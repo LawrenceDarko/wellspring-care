@@ -4,7 +4,7 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 
 ## Root config
 - `package.json` - all deps pinned exact per `docs/adr/001-versions.md`. Scripts: dev, build, typecheck (`next typegen && tsc --noEmit`), test, test:e2e, db:ensure, db:seed. `"type": "module"`.
-- `next.config.ts` - Next 16 (cacheComponents, partialPrefetching, Tailwind via turbopack loader).
+- `next.config.ts` - Next 16 (cacheComponents, partialPrefetching, Tailwind via turbopack loader), wrapped in `createMDX({})`.
 - `tsconfig.json` - strict, `@/*` -> `src/*`, `allowImportingTsExtensions` (scripts run via Node type stripping).
 - `eslint.config.mjs` - flat config, next core-web-vitals + typescript.
 - `vitest.config.ts` - node env; includes `test/**/*.test.{ts,tsx}`, `src/**/*.test.{ts,tsx}`; excludes `test/e2e`; `@` alias; `server-only`, `next/font/google` -> stubs; inlines next-auth.
@@ -17,6 +17,7 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `src/app/(public)/layout.tsx` - public shell: SkipLink, SiteHeader, `<main id="main">`, SiteFooter; settings via `"use cache"` tag `organization-settings` (defaults on ConfigError). Pages render `<div>`, not `<main>`.
 - `src/app/(public)/page.tsx` - home: `"use cache"` loader (settings, categories, events, testimonials; defaults on ConfigError) -> `HomeSections` (`src/components/site/home.tsx`, pure props, type `HomeData`).
 - `src/app/(public)/services/` - directory (`?category=<slug>` only) + `[slug]/page.tsx` detail; Suspense + `"use cache"` tag `catalog`. UI in `src/components/site/services.tsx` (`ServicesDirectory`, `ServiceDetail`, `slugParam`, `formatMoney`, `requestHref` -> `/request/<slug>`).
+- Content pages `src/app/(public)/{about,chaplaincy,weddings,funerals,programs,prayer}/page.tsx` render `src/content/<page>.mdx` in `ContentPage`. `src/components/site/content.tsx`: `TodoOrg` (pending block, hidden in production; `rg -n TodoOrg src/content`), `contentComponents` (used by `src/mdx-components.tsx`).
 - `src/app/api/auth/[...nextauth]/route.ts` - Auth.js GET/POST handlers.
 - `src/app/(public)/sign-in/` - magic-link form (`page.tsx`, server action `requestMagicLink` in `actions.ts`), `check-email/page.tsx`. "Not configured" state on missing env.
 - `src/app/dev/outbox/page.tsx` - dev-only outbox viewer (404 in production). `src/app/dev/ui/page.tsx` - token + component preview (404 in production).
@@ -41,7 +42,7 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `src/server/data/schemas/content.ts` - `events`, `testimonials` (publish requires `consentRecordId`). `src/server/data/content.ts` - `listUpcomingEvents`, `listPublishedTestimonials` (consent granted + not revoked).
 - `src/server/data/settings.ts` - public `getSettings(db?)` (org settings merged over `SETTINGS_DEFAULTS`), type `SiteSettings`.
 - `src/components/ui/` - shadcn (radix, `components.json`): button, card, input, label, textarea, select, dialog, badge, sheet. `cn` from package `cn` (also `@/lib/utils`). Keep focus rings solid (`ring-ring`, no `/50`).
-- `src/server/payments/`, `src/domain/`, `src/content/`, `src/app/(portal)/`, `src/app/(staff)/` - empty (.gitkeep).
+- `src/server/payments/`, `src/domain/`, `src/app/(portal)/`, `src/app/(staff)/` - empty (.gitkeep).
 
 ## scripts/
 - `scripts/db-ensure.ts` - applies registry via `ensureCollections`; needs only MONGODB_URI/MONGODB_DB (`.env.local` auto-loaded).
@@ -56,5 +57,5 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `test/rate-limit.test.ts` - fixed window limit/reset/concurrency, honeypot, form token, Origin. `test/email.test.ts` - transport selection, production refusal, outbox write/TTL/validators.
 - `test/helpers/mongo.ts` - `startMongo()` -> `{ uri, client, db, stop }` on MongoMemoryReplSet. `test/helpers/server-only.ts`, `test/helpers/next-font.ts` - stubs vitest aliases `server-only` / `next/font/google` to.
 - `test/contrast.test.ts` - token contrast pairs, light only, solid focus ring in ui components.
-- `test/catalog.test.ts` (seed idempotent, inactive hidden), `test/content.test.ts` (events, testimonial consent), `test/home.test.tsx` (CTAs, empty sections hidden), `test/services.test.tsx` (directory/detail render, slug param), `test/settings.test.ts`, `test/site-shell.test.tsx` - settings defaults/merge; shell keyboard + footer (jsdom + Testing Library, `// @vitest-environment jsdom`).
+- `test/catalog.test.ts` (seed idempotent, inactive hidden), `test/content.test.ts` (events, testimonial consent), `test/home.test.tsx` (CTAs, empty sections hidden), `test/services.test.tsx` (directory/detail render, slug param), `test/settings.test.ts`, `test/content-pages.test.tsx` (TodoOrg dev/prod, MDX map), `test/site-shell.test.tsx` - settings defaults/merge; shell keyboard + footer (jsdom + Testing Library, `// @vitest-environment jsdom`).
 - `test/e2e/` - Playwright specs (empty).

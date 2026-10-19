@@ -24,6 +24,7 @@ Task 0.2: pin current stable, mutually compatible versions. Source: npm registry
 | typescript / eslint (dev) | 5.9.3 / 9.39.5 | Held: TS 7 (native) and ESLint 10 not yet adopted by next lint plugins; revisit later |
 | server-only | 0.0.1 | only release |
 | @testing-library/react / dom / user-event, jsdom (dev) | 16.3.3 / 10.4.2 / 14.6.8 / 30.1.3 | Added 2026-10-19 (task 1.2, user approved): component + keyboard tests. RTL peers React ^19, dom ^10. jsdom per file via `// @vitest-environment jsdom` |
+| @next/mdx / @mdx-js/loader / @mdx-js/react, @types/mdx (dev) | 16.4.2 / 3.1.1 / 3.1.1 / 2.0.14 | Added 2026-10-19 (task 1.6, user approved): content pages from `src/content/*.mdx` (PRD §4.2). @next/mdx tracks next; peers loader/react >=0.15. No remark/rehype plugins (Turbopack needs serializable options) |
 ## Risks
 - Auth.js v5 has been beta since 2023 (last beta 2026-07-20); the project now sits under Better Auth and gets maintenance/security fixes only. Mitigation: exact pin, keep Auth.js inside `src/server/auth/`, so swapping it touches only that folder.
 - mongodb held at 6.x until the adapter allows ^7. Driver 6.21 is still maintained (`6x` tag).

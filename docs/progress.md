@@ -1,8 +1,16 @@
 # Progress
 
-Current task: 1.6 Content pages
+Current task: 1.7 Legal + scope pages
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.6 Content pages - done 2026-10-19
+- Done: MDX via `@next/mdx` (`next.config.ts` `createMDX({})`, `src/mdx-components.tsx`). Six pages import `src/content/<page>.mdx` into `<ContentPage>`: /about, /chaplaincy, /weddings, /funerals, /programs, /prayer (static explainer, form in Phase 2, emergency notice). `src/components/site/content.tsx`: `TodoOrg` (pending block "Content pending - TODO(org)", optional section heading; returns null when NODE_ENV=production), `contentComponents` (styled headings/lists, internal links via next/link, `TodoOrg`, `EmergencyNotice`).
+- TodoOrg placeholders: mission/vision, history, leadership, credentials, statement of faith, ethics/reporting duties, facilities served, community settings, officiants, ceremony types, hardship policy, cohorts/prices.
+- New deps (user approved, ADR 001 row): @next/mdx 16.4.2, @mdx-js/loader 3.1.1, @mdx-js/react 3.1.1, @types/mdx 2.0.14 (dev).
+- Files: next.config.ts, src/mdx-components.tsx, src/components/site/content.tsx, src/content/*.mdx (6), src/app/(public)/{about,chaplaincy,weddings,funerals,programs,prayer}/page.tsx, test/content-pages.test.tsx, package.json, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/content-pages.test.tsx` 5/5 pass (pending block shown in development/test, nothing incl. heading in production, MDX component map + override, internal/external links).
+- Open: MDX compile not exercised (vitest tests components, not .mdx; no dev server/build until 1.9 GATE). Copy is draft for org review (1.7 copy-check should scan src/content). Links to /contact and /services only; no renewal landing or prayer form yet. About ethics section mentions reporting duties generically pending counsel.
 
 ## 1.5 Services directory + detail - done 2026-10-19
 - Done: `/services` directory (category chips, `?category=<slug>` is the only param, `aria-current` on filter, unknown category -> status note + all services, "From $X" or "Pricing on request") and `/services/[slug]` detail (breadcrumb, starting price, eligibility + pastoral-care-only note, package cards: price, sessions, duration, channels, response time, inclusions, deposit/installments, "Request this service" -> `/request/<slug>`). Both pages: Suspense + `"use cache"` tag `catalog`, cacheLife minutes, ConfigError -> empty/404.
@@ -34,15 +42,7 @@ Current task: 1.6 Content pages
 - Tests: typecheck pass; eslint clean; `npx vitest run test/settings.test.ts test/site-shell.test.tsx` 8/8 pass (defaults when missing, merge + no internal fields, skip link first Tab stop -> #main, nav, mobile sheet opens, footer 911/988/legal/contact); smoke + contrast 6/6.
 - Open: not rendered with dev server or `next build` ("use cache" + fallback unverified until 1.9 GATE). Nav/legal routes 404 until their tasks. Home h1 still hardcodes "Wellspring Care" (home task). Admin settings write must `revalidateTag("organization-settings")`.
 
-## 1.1 Design tokens + fonts - done 2026-10-19
-- Done: brand tokens (hex, light only) in `globals.css` :root, mapped via `@theme inline` (+ `gold`, `font-sans`, `font-display`); h1-h3 use display font; global `prefers-reduced-motion` rule. Fonts Fraunces + Source Sans 3 via `next/font/google` (`src/app/fonts.ts`, ADR 002). shadcn init (radix, new-york) + button, card, input, label, textarea, select, dialog, badge, sheet. `/dev/ui` preview page (404 in production).
-- New deps from shadcn, pinned exact and recorded in ADR 002: radix-ui 1.8.1, class-variance-authority 0.7.1, cn 0.5.0 (shadcn's clsx+tailwind-merge replacement), tw-animate-css 1.4.0 (dev).
-- Focus ring: shadcn `ring-ring/50` measured ~2.5:1 on ivory, changed to solid `ring-ring` in 5 components + base `outline-ring`.
-- `scripts/check-contrast.ts` (`npm run check:contrast`): 25 token pairs, text >= 4.5, UI >= 3. Vitest aliases `next/font/google` to `test/helpers/next-font.ts`.
-- Files: src/app/{globals.css,layout.tsx,fonts.ts,dev/ui/page.tsx}, src/components/ui/*, src/lib/utils.ts, components.json, scripts/check-contrast.ts, test/{contrast.test.ts,helpers/next-font.ts}, vitest.config.ts, package.json, docs/adr/002-fonts.md.
-- Tests: typecheck pass; eslint clean on touched files; `npm run check:contrast` 25/25 pass (lowest: input border 3.58, gold-foreground on gold 4.96); `npx vitest run test/smoke.test.ts test/contrast.test.ts` 6/6 pass.
-- Open: /dev/ui not rendered in a browser (dev server not required by task); font download through next/font not exercised (first happens at next dev/build). Sign-in page not restyled yet.
-
+- 1.1 Design tokens + fonts - done 2026-10-19: brand tokens + `@theme inline`, Fraunces/Source Sans 3 (ADR 002), shadcn init + 9 components, solid focus rings, `check:contrast` 25/25.
 - 0.9 GATE + Phase 2 detail check - done 2026-10-19: typecheck/eslint/55 tests/`next build` pass; Playwright deferred to 1.9; follow-ups added to PLAN.md.
 - 0.8 Rate limit + public-form guard - done 2026-10-19: fixed-window `checkRateLimit` (HMAC keys, TTL), `guardPublicForm` (honeypot, signed formToken, Origin); sign-in rate-limited. Sign-in honeypot/token and CSP still open.
 - 0.7c Sign-in + outbox pages - done 2026-10-19: `/sign-in` magic-link form + server action, check-email page, dev-only `/dev/outbox`, "not configured" state.
