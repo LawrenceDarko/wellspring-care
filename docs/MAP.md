@@ -13,8 +13,7 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 
 ## src/
 - `src/app/layout.tsx` - root layout; exports `metadata`; applies font variables from `src/app/fonts.ts` (Fraunces `--font-heading`, Source Sans 3 `--font-body`, ADR 002).
-- `src/app/globals.css` - Tailwind v4 + shadcn; tokens (hex, light only) in :root, `@theme inline` (`gold`, `band*`, `font-display`, type scale `text-body|lede|h3|h2|h1|display`, `max-w-measure`); utilities `band`, `type-display`; reduced-motion rule. `npm run check:contrast`.
-- UI rule: every UI task follows `docs/adr/006-design-direction.md` + `.claude/skills/frontend-design` (one bold element, sentence case, no eyebrows, cards only for choices, no load motion).
+- `src/app/globals.css` - Tailwind v4 + shadcn; tokens (hex, light only) in :root, `@theme inline` (`gold`, `band*`, `font-display`, type scale `text-body|lede|h3|h2|h1|display`, `max-w-measure`); utilities `band`, `type-display`; reduced-motion rule. `npm run check:contrast`. UI rule: every UI task follows `docs/adr/006-design-direction.md` + `.claude/skills/frontend-design` (one bold element, sentence case, no eyebrows, cards only for choices, no load motion).
 - `src/app/(public)/layout.tsx` - public shell: SkipLink, SiteHeader, `<main id="main">`, SiteFooter; settings via `"use cache"` tag `organization-settings` (defaults on ConfigError). Pages render `<div>`, not `<main>`.
 - `src/app/(public)/page.tsx` - home: `"use cache"` loader (settings, categories, events, testimonials; defaults on ConfigError) -> `HomeSections` (`src/components/site/home.tsx`, pure props, type `HomeData`).
 - `src/app/(public)/services/` - directory (`?category=<slug>` only) + `[slug]/page.tsx` detail; Suspense + `"use cache"` tag `catalog`. UI in `src/components/site/services.tsx` (`ServicesDirectory`, `ServiceDetail`, `slugParam`, `formatMoney`, `requestHref` -> `/request/<slug>`).
