@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { SiteSettings } from "@/server/data/settings";
-import { LEGAL_NAV } from "./nav";
+import { LEGAL_NAV, MAIN_NAV } from "./nav";
 
 /** PRD §1.3: not an emergency service; links to 911 and 988. */
 export function EmergencyNotice() {
@@ -40,7 +40,7 @@ export function SiteFooter({ settings }: { settings: SiteSettings }) {
             Pastoral and spiritual care only. Not a medical or mental-health provider.
           </p>
         </div>
-        <div className="grid gap-10 border-t border-band-gold/50 pt-10 md:grid-cols-3 md:gap-8">
+        <div className="grid gap-10 border-t border-band-gold/50 pt-10 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
           <section aria-labelledby="footer-contact" className="flex flex-col gap-3">
             <h2 id="footer-contact" className="text-lede font-medium">
               Contact
@@ -74,6 +74,23 @@ export function SiteFooter({ settings }: { settings: SiteSettings }) {
               If it is urgent
             </h2>
             <EmergencyNotice />
+          </section>
+          {/* Every header destination as plain links: the way round when the header menus have no JS. */}
+          <section aria-labelledby="footer-explore" className="flex flex-col gap-3">
+            <h2 id="footer-explore" className="text-lede font-medium">
+              Explore
+            </h2>
+            <nav aria-label="Site">
+              <ul className="flex flex-col gap-1.5">
+                {MAIN_NAV.map((link) => (
+                  <li key={link.href}>
+                    <Link href={link.href} className={bandLink}>
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           </section>
           <section aria-labelledby="footer-legal" className="flex flex-col gap-3">
             <h2 id="footer-legal" className="text-lede font-medium">

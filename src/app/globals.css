@@ -67,6 +67,7 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --spacing-header: var(--header-h);
 }
 
 :root {
@@ -110,6 +111,18 @@
   --band-foreground: #f6f5ef;
   --band-muted: #c5d3c8; /* secondary text on the band */
   --band-gold: #d2b46a; /* season markers and rules on the band */
+  /* Sticky header height (ADR 007 Nav): `h-header`, and the hero pulls up under it with `-mt-header`. */
+  --header-h: 4rem;
+}
+
+@media (width >= 64rem) {
+  :root {
+    --header-h: 4.5rem;
+  }
+}
+
+html {
+  scroll-padding-top: var(--header-h);
 }
 
 @layer base {
@@ -135,6 +148,31 @@
   background-color: var(--band);
   color: var(--band-foreground);
   --ring: var(--band-foreground);
+}
+
+/* Header over the forest hero (ADR 007 Nav): see-through, band tokens. Applied by
+   site-header only while no menu is open, so open panels keep linen tokens. */
+@utility header-over-hero {
+  background-color: transparent;
+  border-color: transparent;
+  --foreground: var(--band-foreground);
+  --muted-foreground: var(--band-muted);
+  --primary: var(--band-foreground);
+  --primary-foreground: var(--band);
+  --gold: var(--band-gold);
+  --ring: var(--band-foreground);
+}
+
+/* Mobile menu: links rise in one after another; `--i` is the link's position. Apply with
+   `motion-safe:` so reduced motion shows them at once. */
+@keyframes menu-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+}
+@utility menu-stagger {
+  animation: menu-rise 420ms cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--i, 0) * 40ms) both;
 }
 
 /* Fraunces display treatment: soft axis, tight tracking at large sizes (ADR 006). */

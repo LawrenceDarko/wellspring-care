@@ -1,8 +1,16 @@
 # Progress
 
-Current task: 1.10b Header + nav redesign (then 1.10c-h, GATE, then 2.1)
+Current task: 1.10c Motion foundation (then 1.10d-h, GATE, then 2.1)
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.10b Header + nav redesign - done 2026-10-19
+- Done: `nav.ts` `NAV_GROUPS` (Care: Services, Chaplaincy, Weddings, Funerals & memorials; Programs & events: Programs, Events & retreats, Resources; Prayer, About, Contact) with one-line descriptions from page copy, `REQUEST_CARE` (/services), `MAIN_NAV` now flattened from groups (sentence case labels). shadcn navigation-menu added (focus ring made solid, trigger restyled quiet + 44px, removed its focus-ring suppression on links).
+- Header: one row from `lg` (wordmark wraps to 2 lines at lg, grouped menus, plain links, "Request care" button), sticky. `HeaderScroll` (client) sets `data-over-hero` (a `[data-hero]` still under it), `data-hidden` (scroll down past 2x height; not while focus is inside or a menu is open). CSS: `header-over-hero` swaps tokens to band, off while any `[data-state=open]`; `--header-h` + `h/min-h/-mt/pt-header`, `scroll-padding-top`. Home hero has `data-hero -mt-header pt-header`.
+- Mobile (<lg): full-screen forest Radix Dialog, group headings + Fraunces links, Request care, emergency notice; `motion-safe:menu-stagger` (`--i`), instant under reduced motion. Footer gains "Explore" nav (all `MAIN_NAV`) so menus degrade without JS.
+- Files: src/components/site/{nav.ts,site-header,header-scroll,mobile-nav,site-footer,home}.tsx, src/components/ui/navigation-menu.tsx, src/app/globals.css, test/site-shell.test.tsx, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/site-shell.test.tsx test/home.test.tsx test/contrast.test.ts test/legal-pages.test.tsx test/content-pages.test.tsx test/services.test.tsx` 58/58 (site-shell 12: skip link first, groups/links/Request care, every route from desktop menus and mobile overlay, Escape + focus return both menus, link closes overlay, footer Site nav, hide/show + over-hero attributes, 44px targets). `check:contrast` 28/28, `check:copy` ok. New Tailwind classes verified by compiling globals.css.
+- Open: not rendered in a browser (task did not call for the dev server; 1.10 GATE Playwright covers 360/1280 + keyboard menus). Hero is linen-headed for a frame before hydration. /events and /resources still 404 (later phases). Desktop flat links are plain `Link`s (Tab, not arrow keys).
 
 ## 1.10a RESEARCH Motion + imagery direction - done 2026-10-19
 - Done: user found the UI flat and the header broken (wordmark row + second row of ten links) and asked for a scroll-story redesign. User chose GSAP + Lenis, original vectors + licensed stock, one hero shader. ADR 007: "wellspring" story (spring -> five seasons downstream -> still pool CTA), progressive enhancement + reduced-motion = static, raw WebGL2 shader with guards, stock rules (no faces beside quotes), one-row grouped nav with "Request care". Supersedes ADR 006 rules 1 and 5 on public pages.
@@ -36,14 +44,7 @@ Current task: 1.10b Header + nav redesign (then 1.10c-h, GATE, then 2.1)
 - Tests: typecheck pass; eslint clean; `npx vitest run test/services.test.tsx test/home.test.tsx test/seasons.test.ts` 16/16 pass (new: season grouping order + anchors + no cards in directory; aside holds eligibility + scope note; package card is the only card). `check:copy` ok.
 - Open: not rendered in a browser (360/1280 checked in 1.9 GATE). Marriage season has no categories, so `#season-marriage` never renders (home links it to /weddings). Category chips not ordered by season.
 
-## 1.9c Home restyle - done 2026-10-19
-- Done: full home redesign per ADR 006. Forest-band hero: tagline in `type-display`, lede, CTAs "Request spiritual care" (/services) + "Explore programs" (/programs) as plain wrapping links (old Button had `whitespace-nowrap`), pastoral-only note, then the life-seasons path: labelled `<ol>` of 5 season links with gold numbered markers (aria-hidden) joined by a gold rule (down on mobile, across from lg), DB categories listed under their season. Below: book-page `Section` (gold hairline, optional margin note, `wide` for lists): renewal formats `dl` + margin note, ceremonies/families/chaplaincy 2-col list, events rows, testimonials as quotes, mission + values `dl`. No cards.
-- `src/domain/seasons.ts`: `SEASONS` (marriage, family, renewal, illness, loss; category slugs + href `/services#season-<key>`, marriage -> /weddings), `seasonForCategory`, `groupBySeason`.
-- Header fix (1.9b file, user-reported overflow): nav on its own row from xl with nowrap labels; wordmark `text-lede` on mobile.
-- Files: src/domain/seasons.ts, src/components/site/{home,site-header}.tsx, test/{home,seasons}.test.ts(x), docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/home.test.tsx test/seasons.test.ts test/site-shell.test.tsx` 15/15 pass; `check:copy` ok. Rendered on user's dev server (:3000) in Chrome at 360/768/1280: scrollWidth == viewport, no element past the edge.
-- Open: rendered without DB (no categories under seasons, events/testimonials hidden). `/services#season-*` anchors land in 1.9d. CTA labels now sentence case (PRD §4.3 quotes title case). Tagline title case comes from settings data.
-
+- 1.9c Home restyle - done 2026-10-19: forest-band hero (tagline, CTAs, pastoral-only note) + life-seasons `<ol>` path (`src/domain/seasons.ts`), book-page `Section`s below, no cards; header nav on its own row from xl.
 - 1.9b Shell restyle - done 2026-10-19: Fraunces wordmark header, nav from `xl`, linen Sheet menu below `xl`, forest band footer (contact, emergency, legal); 44px targets, focus on band.
 - 1.9a Design direction - done 2026-10-19: ADR 006 (life-seasons path, refined palette, book-page layout, 8 UI rules), linen/charcoal/moss tokens + `band*`, type scale + `max-w-measure`, PLAN tasks 1.9b-e.
 - 1.8 Contact + general inquiry - done 2026-10-19: `/contact` RHF form -> `submitContactForm` (guard, validate, IP+email rate limit, `contact_messages`, generic receipt email); `FormGuardFields` on sign-in. Contact submit must wait >3s.

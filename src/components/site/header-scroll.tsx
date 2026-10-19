@@ -1,0 +1,60 @@
+"use client";
+
+import { useEffect, useRef, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+
+/** Scroll distance (px) before direction changes count; stops jitter on trackpads. */
+const DIRECTION_SLOP = 6;
+
+/**
+ * Sticky header shell (ADR 007 Nav). Sets attributes only; CSS does the rest:
+ * - `data-over-hero` while a `[data-hero]` element is still under the header,
+ * - `data-scrolled` once the page has moved,
+ * - `data-hidden` on scroll down, cleared on scroll up, on focus inside, or while a menu is open.
+ * A passive scroll listener batched to one frame; no GSAP (1.10c may move this onto Lenis).
+ * Without JS the header stays solid and visible.
+ */
+export function HeaderScroll({ className, children }: { className?: string; children: ReactNode }) {
+  const ref = useRef<HTMLElement>(null);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const header = ref.current;
+    if (!header) return;
+    let lastY = window.scrollY;
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      const y = Math.max(window.scrollY, 0);
+      const height = header.offsetHeight;
+      const hero = document.querySelector<HTMLElement>("[data-hero]");
+      header.toggleAttribute("data-over-hero", hero !== null && hero.getBoundingClientRect().bottom > height);
+      header.toggleAttribute("data-scrolled", y > 0);
+
+      if (Math.abs(y - lastY) < DIRECTION_SLOP) return;
+      const engaged = header.contains(document.activeElement) || header.querySelector('[data-state="open"]');
+      header.toggleAttribute("data-hidden", y > lastY && y > height * 2 && !engaged);
+      lastY = y;
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    const reveal = () => header.removeAttribute("data-hidden");
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    header.addEventListener("focusin", reveal);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      header.removeEventListener("focusin", reveal);
+    };
+  }, [pathname]);
+
+  return (
+    <header ref={ref} className={className}>
+      {children}
+    </header>
+  );
+}

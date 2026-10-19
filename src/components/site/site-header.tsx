@@ -1,8 +1,20 @@
 import Link from "next/link";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
+import { HeaderScroll } from "./header-scroll";
 import { MobileNav } from "./mobile-nav";
-import { MAIN_NAV } from "./nav";
+import { isNavGroup, NAV_GROUPS, REQUEST_CARE } from "./nav";
 
 export const MAIN_CONTENT_ID = "main";
+
+const focus = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 
 /** First focusable element on every public page; visible on focus only. */
 export function SkipLink() {
@@ -16,34 +28,64 @@ export function SkipLink() {
   );
 }
 
-/** Wordmark in the display face; the nav stays quiet (ADR 006: one bold element per page). */
+/**
+ * One row from `lg` (ADR 007 Nav): wordmark, grouped menus, plain links, "Request care".
+ * Sticky; over a `[data-hero]` band it turns see-through with band tokens until a menu opens.
+ */
 export function SiteHeader({ siteName }: { siteName: string }) {
   return (
-    <header className="border-b border-border bg-background">
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-1 px-4 py-3 md:px-6 xl:py-4">
+    <HeaderScroll className="group/header sticky top-0 z-40 border-b border-border bg-background text-foreground transition-[translate,background-color,border-color] duration-300 ease-out data-hidden:-translate-y-full data-over-hero:not-has-[[data-state=open]]:header-over-hero">
+      <div className="mx-auto flex min-h-header w-full max-w-6xl items-center justify-between gap-6 px-4 py-2 md:px-6">
+        {/* Two lines on narrow screens and at lg: a long org name never squeezes the nav. */}
         <Link
           href="/"
-          className="inline-flex min-h-11 items-center rounded-md font-display text-lede font-medium leading-snug md:text-h3 tracking-tight text-primary [font-variation-settings:'SOFT'_50] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          className={`inline-flex min-h-11 max-w-60 items-center rounded-md font-display text-lede leading-tight font-medium tracking-tight text-primary [font-variation-settings:'SOFT'_50] sm:max-w-none lg:max-w-64 xl:max-w-none ${focus}`}
         >
           {siteName}
         </Link>
-        {/* Own row from xl: a long org name and ten links never squeeze each other. */}
-        <nav aria-label="Main" className="hidden xl:block xl:basis-full">
-          <ul className="-ml-2.5 flex flex-wrap items-center gap-x-1 text-[0.9375rem]">
-            {MAIN_NAV.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="inline-flex min-h-11 items-center rounded-md px-2.5 whitespace-nowrap text-muted-foreground underline-offset-[6px] hover:text-foreground hover:underline hover:decoration-gold focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <MobileNav links={MAIN_NAV} siteName={siteName} />
+        <div className="hidden items-center gap-4 lg:flex">
+          <NavigationMenu viewport={false} aria-label="Main" className="max-w-none flex-none">
+            <NavigationMenuList className="gap-0">
+              {NAV_GROUPS.map((entry) =>
+                isNavGroup(entry) ? (
+                  <NavigationMenuItem key={entry.label}>
+                    <NavigationMenuTrigger>{entry.label}</NavigationMenuTrigger>
+                    <NavigationMenuContent className="border-border bg-popover p-2">
+                      <ul className="flex w-[24rem] flex-col">
+                        {entry.links.map((link) => (
+                          <li key={link.href}>
+                            <NavigationMenuLink asChild className="min-h-11 gap-0.5 rounded-md px-3 py-2.5">
+                              <Link href={link.href}>
+                                <span className="text-base font-medium text-foreground">{link.label}</span>
+                                {link.description ? (
+                                  <span className="text-sm text-muted-foreground">{link.description}</span>
+                                ) : null}
+                              </Link>
+                            </NavigationMenuLink>
+                          </li>
+                        ))}
+                      </ul>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                ) : (
+                  <NavigationMenuItem key={entry.href}>
+                    <Link href={entry.href} className={navigationMenuTriggerStyle()}>
+                      {entry.label}
+                    </Link>
+                  </NavigationMenuItem>
+                ),
+              )}
+            </NavigationMenuList>
+          </NavigationMenu>
+          <Link
+            href={REQUEST_CARE.href}
+            className={`inline-flex min-h-11 items-center rounded-md bg-primary px-4 font-medium whitespace-nowrap text-primary-foreground transition-colors hover:bg-primary/90 ${focus}`}
+          >
+            {REQUEST_CARE.label}
+          </Link>
+        </div>
+        <MobileNav siteName={siteName} />
       </div>
-    </header>
+    </HeaderScroll>
   );
 }

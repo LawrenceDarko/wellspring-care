@@ -145,7 +145,8 @@ const values = [
 export function HomeSections({ settings, categories, events, testimonials }: HomeData) {
   return (
     <div className="flex flex-col">
-      <section aria-labelledby="home-hero" className="band">
+      {/* `data-hero`: pulled up under the sticky header, which turns see-through over it (ADR 007 Nav). */}
+      <section aria-labelledby="home-hero" data-hero className="band -mt-header pt-header">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 pt-12 pb-14 md:gap-16 md:px-6 md:pt-20 md:pb-20">
           <div className="flex flex-col gap-6">
             <h1 id="home-hero" className="type-display max-w-4xl break-words">
