@@ -1,8 +1,16 @@
 # Progress
 
-Current task: 1.2 Site shell
+Current task: 1.3 Catalog data + seed
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.2 Site shell - done 2026-10-19
+- Done: `src/server/data/settings.ts` `getSettings(db?)` (public read of `organization_settings` key "default", public-field projection, stored values merged over frozen `SETTINGS_DEFAULTS`). `(public)/layout.tsx`: skip link, header, `<main id="main" tabIndex=-1>`, footer; settings loaded via `"use cache"` + `cacheTag("organization-settings")`, falls back to defaults on `ConfigError` (cacheLife minutes). Header: name from settings, desktop nav (lg+), mobile Sheet nav. Footer: contact from settings or "not configured yet", emergency notice (tel:911, tel:988), legal links, pastoral-care-only line.
+- Public pages' `<main>` -> `<div>` (layout owns `<main>`).
+- New dev deps (user approved, ADR 001 row): @testing-library/react 16.3.3, dom 10.4.2, user-event 14.6.8, jsdom 30.1.3. Vitest now includes `*.test.tsx`.
+- Files: src/server/data/settings.ts, src/components/site/{nav.ts,site-header.tsx,mobile-nav.tsx,site-footer.tsx}, src/app/(public)/{layout,page}.tsx, sign-in pages, test/{settings.test.ts,site-shell.test.tsx}, vitest.config.ts, package.json, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/settings.test.ts test/site-shell.test.tsx` 8/8 pass (defaults when missing, merge + no internal fields, skip link first Tab stop -> #main, nav, mobile sheet opens, footer 911/988/legal/contact); smoke + contrast 6/6.
+- Open: not rendered with dev server or `next build` ("use cache" + fallback unverified until 1.9 GATE). Nav/legal routes 404 until their tasks. Home h1 still hardcodes "Wellspring Care" (home task). Admin settings write must `revalidateTag("organization-settings")`.
 
 ## 1.1 Design tokens + fonts - done 2026-10-19
 - Done: brand tokens (hex, light only) in `globals.css` :root, mapped via `@theme inline` (+ `gold`, `font-sans`, `font-display`); h1-h3 use display font; global `prefers-reduced-motion` rule. Fonts Fraunces + Source Sans 3 via `next/font/google` (`src/app/fonts.ts`, ADR 002). shadcn init (radix, new-york) + button, card, input, label, textarea, select, dialog, badge, sheet. `/dev/ui` preview page (404 in production).
@@ -34,13 +42,7 @@ Current task: 1.2 Site shell
 - Tests: typecheck pass; eslint clean. Dev server (port 3123, start/curl/kill): /sign-in 200 with form when MONGODB_URI+AUTH_SECRET+FIELD_ENC_KEY set; "not configured" when FIELD_ENC_KEY missing; `?error=Verification` shows expired-link message; /sign-in/check-email 200.
 - Open: /dev/outbox not exercised (no local mongod); no automated test for the pages or action. No rate limit on sign-in yet (0.8). Unstyled until 1.1 tokens/shadcn. Sign-in submit not tried end to end in a browser.
 
-## 0.7b Auth.js core - done 2026-10-19
-- Done: `src/server/auth/index.ts` (server-only): `createAuthConfig(deps)` = MongoDB adapter (users/accounts/sessions/verification_tokens), `session.strategy: "database"`, email provider (15 min) sending `magicLinkEmail()` (generic subject, template `magic_link`) via `sendEmail()`, secure cookies forced in prod, pages signIn/error `/sign-in`, verifyRequest `/sign-in/check-email`. Session callback reads `user_roles` -> `session.user.{id, roles}`. `NextAuth(() => config)` lazy (no env at import): `handlers, auth, signIn, signOut`; `getAuthContext()` (React `cache`) -> `AuthContext | null`.
-- `user_roles` zod + `$jsonSchema` (schemas/identity.ts, role enum = ROLES), registry (unique userId+role); `src/server/data/user-roles.ts` `listRolesForUser` (system-level). Route `src/app/api/auth/[...nextauth]/route.ts`. Vitest inlines next-auth (its `next/server` import fails under plain Node ESM).
-- Files: src/server/auth/index.ts, src/server/data/{user-roles,registry,schemas/identity}.ts, src/app/api/auth/[...nextauth]/route.ts, test/auth.test.ts, vitest.config.ts, docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/auth.test.ts test/db-ensure.test.ts test/email.test.ts test/authz` 26/26 pass. auth.test: CSRF -> signin/email -> 1 hashed verification token + 1 outbox mail -> callback consumes token, creates user + DB session -> /session returns roles from user_roles; DB rejects unknown role.
-- Open: assignments in AuthContext empty until those collections exist. Staff 12h re-auth (PRD §13.2) not done. Google provider not added (optional). Production should set AUTH_URL (Auth.js trusts Host otherwise only outside prod). `/sign-in`, `/sign-in/check-email` pages come in 0.7c. Not tried with real Resend.
-
+- 0.7b Auth.js core - done 2026-10-19: Mongo adapter, DB sessions, email magic link, `user_roles` -> session roles, `getAuthContext()`.
 - 0.7a Email transport - done 2026-10-19: `email_outbox` + TTL, `sendEmail` (Resend or dev outbox, refuses in prod without Resend), `EmailNotConfiguredError`.
 - 0.6 Field encryption + audit + logger - done 2026-10-19: AES-256-GCM `encryptField`/`decryptField` with kid + aad, allowlisted logger, `recordAudit` with meta allowlist.
 - 0.5 Authz core - done 2026-10-19: capability map, `AuthContext`, `requireUser`/`requireCapability`, `scopedCollection` + scopes; IDOR tests.

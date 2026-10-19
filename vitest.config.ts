@@ -11,7 +11,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["test/**/*.test.ts", "src/**/*.test.ts"],
+    include: ["test/**/*.test.{ts,tsx}", "src/**/*.test.{ts,tsx}"],
     exclude: ["test/e2e/**", "node_modules/**"],
     // next-auth imports "next/server" without an extension; let Vite resolve it.
     server: { deps: { inline: ["next-auth"] } },
