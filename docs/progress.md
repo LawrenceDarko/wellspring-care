@@ -1,8 +1,16 @@
 # Progress
 
-Current task: 0.6 Field encryption + audit + logger
+Current task: 0.7 Auth.js wiring
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 0.6 Field encryption + audit + logger - done 2026-10-19
+- Done: `src/server/crypto/field.ts` (server-only): AES-256-GCM, 12-byte random IV, 16-byte tag, stored `{v:1,kid,iv,tag,ct}`. `createKeyring(currentKid, {kid: b64})` (multi-key for rotation), `getKeyring()` from FIELD_ENC_KEY/KID, `encryptField(pt, aad?, ring?)`, `decryptField(f, aad?, ring?)`, `needsRotation`. Optional `aad` binds ciphertext to record (e.g. `pastoral_notes.body:<id>`). `FieldCryptoError` messages never carry data.
+- `src/server/log.ts`: `log`, `createLogger(sink)`, `LOG_FIELDS` allowlist, primitives only, route query stripped, strings capped 200, `dropped` count; `errorFields(err)` = name only.
+- `src/server/audit.ts`: `recordAudit(ctx|null, {action, targetType?, targetId?, meta?}, db?)`, `AUDIT_ACTIONS` (PRD §13.6 list), `AUDIT_META_FIELDS` allowlist. Writes via `src/server/data/audit-logs.ts` `insertAuditLog` (append-only, zod-validated).
+- Files: src/server/{crypto/field,log,audit}.ts, src/server/data/audit-logs.ts, test/crypto/field.test.ts, test/log-audit.test.ts, docs. Removed `src/server/{audit,crypto}/.gitkeep` (audit is a file, not a dir).
+- Tests: typecheck pass; eslint clean; `npx vitest run test/crypto test/log-audit.test.ts` 14/14 pass (round trip, fresh IV, tamper ct/tag/iv, unknown kid, wrong key, aad mismatch, rotation, stored doc no plaintext, logger drops non-allowlisted/objects/errors, audit meta allowlist, null system actor, unknown action rejected).
+- Open: only one key from env today; retired keys for rotation need a config key (e.g. FIELD_ENC_OLD_KEYS) when rotation is first needed. Log/audit allowlists are my choice; extend per task. No audit read path yet (PRD §12.3, needs `audit:read`).
 
 ## 0.5 Authz core - done 2026-10-19
 - Done: `src/server/auth/capabilities.ts` (pure): `ROLES`, `CAPABILITIES`, `ROLE_CAPABILITIES` per PRD §2, `capabilitiesFor(roles)` union (unknown roles grant nothing). super_admin = all staff caps + break_glass, roles:grant, audit:read, settings:manage, content:manage. No reflection capability exists at all (owner scope only).
@@ -32,9 +40,4 @@ Current task: 0.6 Field encryption + audit + logger
 - Tests: `npm ls` no peer errors; typecheck pass; eslint clean; `npx vitest run test/smoke.test.ts` 1/1 pass; `npm audit --omit=dev` 0.
 - Open: Auth.js v5 still beta, maintenance-only (risk in ADR). 9 high dev-only audit warnings. mongodb-memory-server postinstall blocked: binary downloads on first use (0.4).
 
-## 0.1 Scaffold - done 2026-10-19
-- Done: create-next-app@latest (next 16.4.2, react 19.3.0, TS strict, App Router, Tailwind v4, ESLint flat, `src/`), scaffolded in scratch dir and written into repo. Scripts typecheck/test/test:e2e/db:ensure/db:seed; Vitest + Playwright configs; folder layout with .gitkeep; `.env.example`; `.gitignore` (+ `!.env.example`, Playwright dirs); home moved to `(public)`; Geist Google font removed (system font until ADR 002).
-- Installed beyond scaffold: vitest 5.0.5, @playwright/test 1.64.1 (needed for smoke test; 0.2 pins). @types/node bumped ^20 -> ^24 (vitest 5 peer range).
-- Files: package.json, tsconfig.json, eslint.config.mjs, next.config.ts, vitest.config.ts, playwright.config.ts, .gitignore, .env.example, src/app/{layout.tsx,globals.css,(public)/page.tsx,favicon.ico}, scripts/db-*.ts, test/smoke.test.ts, docs/MAP.md.
-- Tests: `npm run typecheck` pass; `npx eslint src test scripts vitest.config.ts playwright.config.ts` clean; `npx vitest run test/smoke.test.ts` 1/1 pass.
-- Open: create-next-app's AGENTS.md not added (it tells agents to read node_modules, conflicts with CLAUDE.md rule 4); `next dev` may regenerate it, decide whether to commit or gitignore. npm blocked install scripts for unrs-resolver and fsevents (allowScripts); harmless so far. 5 high npm audit warnings from scaffold, not reviewed. `.claude/settings.json` unchanged.
+- 0.1 Scaffold - done 2026-10-19: Next 16.4.2 + React 19 scaffold, Vitest/Playwright configs, folder layout, `.env.example`; AGENTS.md not added; npm audit warnings unreviewed.

@@ -23,7 +23,11 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `src/server/data/base.ts` - server-only scoped repo helper. `scopedCollection(db, name, scope)` (findOne/find/countDocuments/updateOne/deleteOne, all take ctx), scopes `ownerScope`, `assignedScope`, `capabilityScope`, `anyScope`, `UnscopedQueryError`. Every repository builds on this.
 - `src/server/data/schemas/system.ts` - zod schemas + `$jsonSchema` validators (kept in step by hand) for organization_settings, audit_logs, rate_limits. Relative imports only (loaded by Node in scripts).
 - `src/server/data/registry.ts` - `collections` (name, validator, named indexes) + `ensureCollections(db)` (idempotent). Add each new collection here.
-- `src/server/{crypto,email,payments,audit}/` - empty (.gitkeep).
+- `src/server/crypto/field.ts` - server-only AES-256-GCM field encryption (PRD §13.3). `encryptField(pt, aad?)`, `decryptField(f, aad?)`, `createKeyring`, `getKeyring`, `needsRotation`, `FieldCryptoError`, type `EncryptedField`. Pass `aad` = `<collection>.<field>:<docId>`.
+- `src/server/log.ts` - server-only structured logger, allowlisted primitive fields only. `log`, `createLogger(sink)`, `LOG_FIELDS`, `errorFields(err)`. Never log raw errors or user input.
+- `src/server/audit.ts` - server-only `recordAudit(ctx|null, event, db?)`, `AUDIT_ACTIONS`, `AUDIT_META_FIELDS` (meta allowlist), `sanitizeAuditMeta`.
+- `src/server/data/audit-logs.ts` - append-only `insertAuditLog(db, entry)`; used only by audit.ts.
+- `src/server/{email,payments}/` - empty (.gitkeep).
 - `src/domain/`, `src/components/`, `src/content/` - empty (.gitkeep).
 
 ## scripts/
@@ -35,6 +39,7 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `test/config.test.ts` - config parsing, integration booleans, required-key errors.
 - `test/db-ensure.test.ts` - ensure idempotency, TTL, validator accept/reject.
 - `test/authz/` - capability map + scoped-collection IDOR tests (PRD §13.1 IDOR suite lives here).
+- `test/crypto/field.test.ts`, `test/log-audit.test.ts` - encryption (tamper/kid/aad/rotation/no plaintext), logger allowlist, audit writes.
 - `test/helpers/mongo.ts` - `startMongo()` -> `{ uri, client, db, stop }` on MongoMemoryReplSet.
 - `test/helpers/server-only.ts` - empty stub; vitest aliases `server-only` to it.
 - `test/e2e/` - Playwright specs (empty).
