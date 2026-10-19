@@ -1,8 +1,16 @@
 # Progress
 
-Current task: 1.8 Contact + general inquiry
+Current task: 1.9 GATE + write Phase 2 tasks
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.8 Contact + general inquiry - done 2026-10-19
+- Done: `/contact` page (EmergencyNotice, link to /services for care requests) with RHF + zod client form (`contact-form.tsx`, `useActionState`, posts without JS too) -> server action `sendContactMessage` -> `submitContactForm` (`src/server/contact.ts`): guard (honeypot looks like success, stores nothing; bad/too-fast/expired token -> "form expired") -> validate (`contactInputSchema` in `src/domain/contact.ts`) -> rate limit per IP and per email (`publicForm` rule, scopes contactIp/contactEmail) -> `insertContactMessage` -> generic "inquiry_received" email (no name/message); missing/failing email transport only skips the receipt.
+- New collection `contact_messages` (name, email, message, status new/closed, closedAt?, timestamps; strict zod + `additionalProperties: false`). Token minted per request (`connection()`); missing AUTH_SECRET -> "not configured".
+- Sign-in follow-up: `FormGuardFields` (`src/components/site/form-guard.tsx`, honeypot + `formToken`) on the sign-in form; `requestMagicLink` guards first (honeypot -> check-email, else `?error=FormExpired`).
+- Files: src/domain/contact.ts, src/server/data/{schemas/contact.ts,contact-messages.ts,registry.ts}, src/server/contact.ts, src/components/site/form-guard.tsx, src/app/(public)/contact/{page.tsx,contact-form.tsx,actions.ts}, src/app/(public)/sign-in/{page.tsx,actions.ts}, test/{contact.test.ts,form-guard.test.tsx}, docs. (~11 files, over the ~6 guideline; small each.)
+- Tests: typecheck pass; eslint clean; `npx vitest run test/contact.test.ts test/form-guard.test.tsx test/rate-limit.test.ts test/db-ensure.test.ts test/auth.test.ts` 21/21 pass (valid stores exactly allowlisted keys + generic email, outbox write, no-email still stores, honeypot, forged/fast/missing token, field errors, IP + email limits, hashed keys). `check:copy` ok.
+- Open: ContactForm client + sign-in action guard not exercised in tests (no render of server-action modules); verify in 1.9 Playwright (contact submit must wait >3s MIN_FILL_MS). Sign-in submitted within 3s shows "form expired". No staff read of contact_messages yet; retention purge not built.
 
 ## 1.7 Legal + scope pages - done 2026-10-19
 - Done: six MDX drafts in `src/content/legal/` (privacy, terms, cancellation, refund, accessibility, service-scope) at `/legal/<slug>` (matches `LEGAL_NAV`). `LegalPage` wrapper (`src/components/site/content.tsx`) renders `DraftBanner` "Draft - requires legal review" in every environment above the body. Org/counsel facts (entity, governing law, notice windows, refund rules, confidentiality limits, state privacy rights) are `TodoOrg`. Service scope renders `EmergencyNotice`.
@@ -34,13 +42,7 @@ Current task: 1.8 Contact + general inquiry
 - Tests: typecheck pass; eslint clean; `npx vitest run test/home.test.tsx test/content.test.ts test/db-ensure.test.ts` 12/12 pass (CTAs, sections, no testimonial/event section when empty, event date in org tz, revoked/denied/missing consent hidden, validator rejects unconsented publish); smoke + catalog + site-shell 13/13.
 - Open: not rendered in dev server/build (1.9 GATE). Mission/values copy is generic placeholder for org review. `consent_records` has no validator yet (intake tasks). Consent revoke and event/testimonial admin writes must `revalidateTag` ("testimonials"/"events"). Linked routes 404 until their tasks.
 
-## 1.3 Catalog data + seed - done 2026-10-19
-- Done: `schemas/catalog.ts` zod + `$jsonSchema` for `service_categories`, `services`, `service_packages` (price in cents, `depositRule` none/percent/fixed, `channels` enum, optional `stripePriceId`); registry entries with slug-unique and order indexes (`service_slug_unique` per package). Public read `src/server/data/catalog.ts`: `listCategories`, `listServices({categorySlug?})`, `getServiceBySlug` (active only; services in inactive categories hidden; no `active`/`stripePriceId`/timestamps in output).
-- Seed: `scripts/seed/catalog.ts` `seedCatalog(db, {activatePackages?})`: 5 categories, the 20 PRD §5.2 services, fictional packages in PRD §8 ranges; upsert by slug with `$setOnInsert` only (re-run never overwrites admin edits); packages `active: false` unless dev flag. `npm run db:seed [-- --activate-packages]` (flag refused when NODE_ENV=production; now loads .env.local).
-- Files: src/server/data/{schemas/catalog.ts,catalog.ts,registry.ts}, scripts/{db-seed.ts,seed/catalog.ts}, test/catalog.test.ts, package.json, docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/catalog.test.ts test/db-ensure.test.ts` 11/11 pass (seed idempotent + validators, all packages inactive, admin edits kept, dev flag activates, inactive packages/services/categories hidden, ordering + filter). `node scripts/db-seed.ts` without URI exits 1 with message (imports load).
-- Open: seed not run against a real DB (no local mongod). `intakeFormKey` values (general-care, hospice, family-couples) have no `intake_forms` yet (intake tasks). Service `bodyRef` copy not written. Prices are placeholders pending org review.
-
+- 1.3 Catalog data + seed - done 2026-10-19: catalog zod + validators, public `listCategories`/`listServices`/`getServiceBySlug`, `seedCatalog` (20 services, packages inactive, $setOnInsert), `db:seed`.
 - 1.2 Site shell - done 2026-10-19: `getSettings` over defaults, public layout (skip link, header, mobile Sheet nav, footer with 911/988 + legal links), Testing Library + jsdom dev deps.
 - 1.1 Design tokens + fonts - done 2026-10-19: brand tokens + `@theme inline`, Fraunces/Source Sans 3 (ADR 002), shadcn init + 9 components, solid focus rings, `check:contrast` 25/25.
 - 0.9 GATE + Phase 2 detail check - done 2026-10-19: typecheck/eslint/55 tests/`next build` pass; Playwright deferred to 1.9; follow-ups added to PLAN.md.

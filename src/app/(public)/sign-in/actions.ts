@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { signIn } from "@/server/auth";
 import { log } from "@/server/log";
-import { clientIp, rateLimit } from "@/server/rate-limit";
+import { clientIp, guardPublicForm, rateLimit } from "@/server/rate-limit";
 
 const emailSchema = z.email().max(320);
 
@@ -19,6 +19,13 @@ function safeRedirect(value: FormDataEntryValue | null): string {
 }
 
 export async function requestMagicLink(formData: FormData): Promise<void> {
+  // PRD §13.5 honeypot + signed render time. A filled honeypot looks like success.
+  const guard = guardPublicForm(formData);
+  if (!guard.ok) {
+    log.warn("auth.sign_in_guard_rejected", { action: guard.reason });
+    redirect(guard.reason === "honeypot" ? "/sign-in/check-email" : "/sign-in?error=FormExpired");
+  }
+
   const email = emailSchema.safeParse(String(formData.get("email") ?? "").trim());
   if (!email.success) redirect("/sign-in?error=InvalidEmail");
 

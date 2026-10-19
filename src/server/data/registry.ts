@@ -8,6 +8,7 @@ import {
 import { userRoleValidator } from "./schemas/identity.ts";
 import { serviceCategoryValidator, servicePackageValidator, serviceValidator } from "./schemas/catalog.ts";
 import { eventValidator, testimonialValidator } from "./schemas/content.ts";
+import { contactMessageValidator } from "./schemas/contact.ts";
 
 // PRD §3.1: single source of collection validators + indexes, applied by
 // `npm run db:ensure` and by test helpers. Every index has an explicit name so
@@ -91,6 +92,11 @@ export const collections: CollectionSpec[] = [
     name: "testimonials",
     validator: testimonialValidator,
     indexes: [{ key: { published: 1, order: 1 }, name: "published_order" }],
+  },
+  {
+    name: "contact_messages",
+    validator: contactMessageValidator,
+    indexes: [{ key: { status: 1, createdAt: -1 }, name: "status_createdAt" }],
   },
 ];
 

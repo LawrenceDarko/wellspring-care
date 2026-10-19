@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { FormGuardFields } from "@/components/site/form-guard";
 import { ConfigError } from "@/server/config";
 import { emailAvailable } from "@/server/email";
+import { publicFormToken } from "@/server/rate-limit";
 import { requestMagicLink } from "./actions";
 
 export const metadata: Metadata = { title: "Sign in - Wellspring Care" };
@@ -11,6 +13,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   InvalidEmail: "Please enter a valid email address.",
   Verification: "That sign-in link has expired or was already used. Request a new one below.",
   RateLimited: "Too many sign-in requests. Please wait a few minutes and try again.",
+  FormExpired: "This form has expired. Please try again.",
 };
 const DEFAULT_ERROR = "We could not sign you in. Please try again.";
 
@@ -38,13 +41,14 @@ async function SignInForm({ searchParams }: { searchParams: PageProps<"/sign-in"
   }
 
   return (
-    <form action={requestMagicLink} className="flex flex-col gap-4">
+    <form action={requestMagicLink} className="relative flex flex-col gap-4">
       {error && (
         <p role="alert" className="rounded border border-red-700 p-3 text-sm text-red-800">
           {error}
         </p>
       )}
       <input type="hidden" name="callbackUrl" value={callbackUrl} />
+      <FormGuardFields token={publicFormToken()} />
       <label htmlFor="email" className="text-sm font-medium">
         Email address
       </label>
