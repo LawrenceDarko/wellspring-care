@@ -1,8 +1,16 @@
 # Progress
 
-Current task: 1.10d Vector art set (then 1.10e-h, GATE, then 2.1)
+Current task: 1.10e Hero shader (then 1.10f-h, GATE, then 2.1)
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.10d Vector art set - done 2026-10-19
+- Done: `src/components/art/`: `tokens.ts` (`ART_TOKENS`, `art(token)` -> `var(--art-*)`, shared `treePath`), `landscape.tsx` (wellspring at dawn: `Sky` (gradient, sun glow), `FarHills`, `NearHills`, `Water` (spring + stream, sun glints), `Trees` (foreground banks + trees), `Birds`; each its own aria-hidden `<svg>` on viewBox 1440x900, `xMidYMax slice`, shapes run past the bottom with overflow visible), `LANDSCAPE_LAYERS` (depths: sky 0.3, far 0.2, near hills + water 0.1, trees 0, birds 0.36), `Landscape({parallax?})` (clipped box, wraps moving layers in `Parallax`). `seasons-art.tsx`: five vignettes (320x200) on the one stream, each at its own hour: confluence, tree household, spring rings + shoot, lit house window, moonlit still pool + cairn; `SEASON_ART`, `SeasonArt({season})`. Barrel `index.ts`.
+- 16 `--art-*` hex tokens in `:root` (decorative, no contrast pairs). Colours set via `style` (var() in presentation attributes is not reliable); gradient ids from `useId`.
+- `/dev/ui` "Vector art" block: parallax landscape + the five vignettes under `SEASONS` names.
+- Files: src/components/art/{tokens.ts,landscape.tsx,seasons-art.tsx,index.ts}, src/app/globals.css, src/app/dev/ui/page.tsx, test/art.test.tsx, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/art.test.tsx test/contrast.test.ts test/motion.test.tsx` 16/16 (art 5: tokens defined as hex, no hex/rgb/hsl in sources or markup, 6 aria-hidden layer svgs on one viewBox, parallax depths wired + foreground static, one vignette per season with unique resolvable gradient ids). `check:contrast` 28/28. Temporary `next dev` (:3210, own distDir, then killed and removed) + scratch Playwright: `/dev/ui` horizontal overflow 0 px at 360 and 1280; screenshots reviewed (fixed: trees cropped out at 360, heavy bank stripe in the illness vignette).
+- Open: parallax drift not watched while scrolling (screenshots are static); mobile hero is mostly sky (room for the tagline in 1.10f). Light-only palette, like the rest.
 
 ## 1.10c Motion foundation - done 2026-10-19
 - Done: `src/components/motion/`: `gsap.ts` (registers ScrollTrigger + useGSAP once, `MOTION` tokens: `power3.out`, reveal 0.9s/24px/"top 85%"), `useReducedMotion` (useSyncExternalStore; server/hydration and missing matchMedia = reduced, so motion starts after hydration), `MotionProvider` (Lenis `autoRaf:false` on the GSAP ticker -> `ScrollTrigger.update`, none under reduced motion, stops while body has `data-scroll-locked` (Radix dialogs), `ScrollTrigger.refresh()` on pathname change), `Reveal` (gsap.from opacity+y, once; opacity only so links stay focusable), `Parallax` (`speed` = share of viewport height, scrubbed, `invalidateOnRefresh`). Barrel `index.ts`.
@@ -36,14 +44,7 @@ Current task: 1.10d Vector art set (then 1.10e-h, GATE, then 2.1)
 - Tests: typecheck pass; `npx eslint src test scripts` clean; `npx vitest run` 134/134 (22 files); `next build` ok (23 routes, built without env so home/settings use defaults); `npm run test:e2e` 2/2 pass (run twice). Playwright chromium-headless-shell 1248 downloaded (pinned 1.64.1 needed it).
 - Open: smoke covers only one service and Chromium; no 768 px check; IDOR suite has no Phase 2 repos yet. 1.9b-e "not rendered" items now covered only by the no-scroll check, not visual review. New capability `requests:triage` (2.7) is not in PRD §2: confirm with the org.
 
-## 1.9e Content, legal, contact, sign-in restyle - done 2026-10-19
-- Done: `ContentPage` is a book page (max-w-6xl grid, article at `max-w-measure`, first `p` after h1 is `text-lede`, optional `note` in a 15rem margin column, first in DOM so it reads first on mobile). `contentComponents`: h1/h2/h3 on the type scale, h2 opens with a gold hairline, gold list markers. `TodoOrg` no all-caps. `LegalPage` puts `DraftBanner` (same text + role/label) in the margin note.
-- Contact: book-page header (h1, lede) + EmergencyNotice in the margin, form below a hairline; alerts as destructive left-rule, sent/not-configured states on pale moss. `CONTACT_MESSAGES` now say what happened and what to do (expired also covers "sent too quickly").
-- Sign-in: shadcn Input/Label/Button (old black button gone), error alert linked via `aria-describedby`, `EmailSignin` message added, clearer InvalidEmail/FormExpired copy. Check-email restyled.
-- Files: src/components/site/content.tsx, src/app/(public)/contact/{page,contact-form}.tsx, src/app/(public)/sign-in/{page,check-email/page}.tsx, src/server/contact.ts, test/{content-pages,legal-pages}.test.tsx, docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/content-pages.test.tsx test/legal-pages.test.tsx test/form-guard.test.tsx test/contact.test.ts test/site-shell.test.tsx test/contrast.test.ts` 48/48 pass (new: measure/lede/hairline, margin note order, no all-caps, draft notice in margin). `check:copy` ok.
-- Open: not rendered in a browser (360/1280 in 1.9 GATE). Content pages pass no `note` yet. Sign-in page not unit tested (async server component).
-
+- 1.9e Content, legal, contact, sign-in restyle - done 2026-10-19: `ContentPage` book page (measure, lede, gold hairline h2, margin note), `LegalPage` draft notice in margin, contact book-page + clearer `CONTACT_MESSAGES`, sign-in on shadcn inputs.
 - 1.9d Services restyle - done 2026-10-19: directory grouped by life season (`groupServicesBySeason`, `#season-<key>`, gold markers, rows not cards), quiet category filter, detail with margin aside + package cards.
 - 1.9c Home restyle - done 2026-10-19: forest-band hero (tagline, CTAs, pastoral-only note) + life-seasons `<ol>` path (`src/domain/seasons.ts`), book-page `Section`s below, no cards; header nav on its own row from xl.
 - 1.9b Shell restyle - done 2026-10-19: Fraunces wordmark header, nav from `xl`, linen Sheet menu below `xl`, forest band footer (contact, emergency, legal); 44px targets, focus on band.

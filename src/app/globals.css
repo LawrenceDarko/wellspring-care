@@ -111,6 +111,24 @@
   --band-foreground: #f6f5ef;
   --band-muted: #c5d3c8; /* secondary text on the band */
   --band-gold: #d2b46a; /* season markers and rules on the band */
+  /* Vector art (ADR 007 Vectors), used only via `art()` in src/components/art/tokens.ts.
+     Decorative fills, never text, so no contrast pairs. */
+  --art-sky-high: #dfe8e2;
+  --art-sky-low: #f2e6c4;
+  --art-sky-dusk: #c9d2cc;
+  --art-sky-night: #2a4a3d;
+  --art-sun: #e4c77e;
+  --art-moon: #eef0e6;
+  --art-lamp: #f0d38a;
+  --art-hill-far: #bccbbf;
+  --art-hill-mid: #7e9f8b;
+  --art-hill-near: #4f7d67;
+  --art-ground: #2d5e48;
+  --art-tree: #1f4d3a;
+  --art-stone: #a9aa9d;
+  --art-water: #a7c0ba;
+  --art-water-light: #e8efe9;
+  --art-bird: #55534c;
   /* Sticky header height (ADR 007 Nav): `h-header`, and the hero pulls up under it with `-mt-header`. */
   --header-h: 4rem;
   /* Motion tokens (ADR 007). GSAP twins live in `MOTION` (src/components/motion/gsap.ts):

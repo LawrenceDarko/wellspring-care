@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Landscape, SEASON_ART } from "@/components/art";
 import { MotionProvider, Parallax, Reveal } from "@/components/motion";
+import { SEASONS } from "@/domain/seasons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,7 +42,7 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-// Tasks 1.1 + 1.9a + 1.10c: design token, component and motion preview (ADR 006, 007). 404 in production.
+// Tasks 1.1 + 1.9a + 1.10c + 1.10d: design token, component and motion preview (ADR 006, 007). 404 in production.
 
 export const metadata: Metadata = {
   title: "Dev UI",
@@ -272,6 +274,26 @@ export default function DevUiPage() {
               </Reveal>
             ),
           )}
+        </Section>
+
+        <Section title="Vector art">
+          <p className="max-w-measure text-muted-foreground">
+            The wellspring at dawn, six layers drifting at their own depth, and
+            the five season vignettes downstream (ADR 007). Colours are the
+            --art-* tokens.
+          </p>
+          <Landscape parallax className="h-[28rem] rounded-lg lg:h-[36rem]" />
+          <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+            {SEASONS.map((season) => {
+              const Art = SEASON_ART[season.key];
+              return (
+                <li key={season.key} className="flex flex-col gap-2">
+                  <Art className="rounded-lg" />
+                  <p className="font-display text-lg">{season.name}</p>
+                </li>
+              );
+            })}
+          </ol>
         </Section>
       </main>
     </MotionProvider>
