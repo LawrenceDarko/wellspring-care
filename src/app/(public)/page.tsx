@@ -1,15 +1,33 @@
-export default function HomePage() {
-  return (
-    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center gap-4 px-4 py-16">
-      <h1 className="text-3xl font-semibold">Wellspring Care</h1>
-      <p>
-        Faith-based chaplaincy, pastoral care, renewal programs, weddings,
-        funerals and events.
-      </p>
-      <p className="text-sm">
-        Pastoral care only. We are not a medical, mental-health or emergency
-        provider. In an emergency, call your local emergency number.
-      </p>
-    </div>
-  );
+import { cacheLife, cacheTag } from "next/cache";
+import { HomeSections, type HomeData } from "@/components/site/home";
+import { ConfigError } from "@/server/config";
+import { listCategories } from "@/server/data/catalog";
+import { listPublishedTestimonials, listUpcomingEvents } from "@/server/data/content";
+import { errorFields, log } from "@/server/log";
+import { getSettings, SETTINGS_DEFAULTS } from "@/server/data/settings";
+
+async function loadHome(): Promise<HomeData> {
+  "use cache";
+  cacheTag("organization-settings", "catalog", "events", "testimonials");
+  try {
+    const [settings, categories, events, testimonials] = await Promise.all([
+      getSettings(),
+      listCategories(),
+      listUpcomingEvents({ limit: 3 }),
+      listPublishedTestimonials({ limit: 3 }),
+    ]);
+    // Minutes, not hours: past events must drop off and revoked consent must hide quickly.
+    cacheLife("minutes");
+    return { settings, categories, events, testimonials };
+  } catch (err) {
+    // No DB configured (e.g. build without MONGODB_URI): render without DB sections.
+    if (!(err instanceof ConfigError)) throw err;
+    log.warn("home.defaults", errorFields(err));
+    cacheLife("minutes");
+    return { settings: { ...SETTINGS_DEFAULTS }, categories: [], events: [], testimonials: [] };
+  }
+}
+
+export default async function HomePage() {
+  return <HomeSections {...(await loadHome())} />;
 }

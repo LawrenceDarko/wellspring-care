@@ -1,8 +1,16 @@
 # Progress
 
-Current task: 1.4 Home page
+Current task: 1.5 Services directory + detail
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.4 Home page - done 2026-10-19
+- Done: `HomeSections` (pure props) per PRD §4.3: hero (tagline from settings, "Request Spiritual Care" -> /services until intake exists, "Explore Programs" -> /programs, pastoral-care-only line), active categories (links `/services?category=<slug>`), 4/8-week renewal (not-a-cure line), weddings/funerals, family + chaplaincy, events, testimonials, mission/values. Events and testimonials sections omitted when empty.
+- New collections `events`, `testimonials` (schemas/content.ts, registry). Validator rejects `published: true` without `consentRecordId`. `src/server/data/content.ts`: `listUpcomingEvents` (published, not ended, soonest first), `listPublishedTestimonials` (also requires `consent_records` doc granted + not revoked).
+- Page loads via `"use cache"` tags organization-settings/catalog/events/testimonials, cacheLife minutes; ConfigError -> defaults with no DB sections.
+- Files: src/server/data/{schemas/content.ts,content.ts,registry.ts}, src/components/site/home.tsx, src/app/(public)/page.tsx, test/{home.test.tsx,content.test.ts}, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/home.test.tsx test/content.test.ts test/db-ensure.test.ts` 12/12 pass (CTAs, sections, no testimonial/event section when empty, event date in org tz, revoked/denied/missing consent hidden, validator rejects unconsented publish); smoke + catalog + site-shell 13/13.
+- Open: not rendered in dev server/build (1.9 GATE). Mission/values copy is generic placeholder for org review. `consent_records` has no validator yet (intake tasks). Consent revoke and event/testimonial admin writes must `revalidateTag` ("testimonials"/"events"). Linked routes 404 until their tasks.
 
 ## 1.3 Catalog data + seed - done 2026-10-19
 - Done: `schemas/catalog.ts` zod + `$jsonSchema` for `service_categories`, `services`, `service_packages` (price in cents, `depositRule` none/percent/fixed, `channels` enum, optional `stripePriceId`); registry entries with slug-unique and order indexes (`service_slug_unique` per package). Public read `src/server/data/catalog.ts`: `listCategories`, `listServices({categorySlug?})`, `getServiceBySlug` (active only; services in inactive categories hidden; no `active`/`stripePriceId`/timestamps in output).
@@ -35,14 +43,7 @@ Current task: 1.4 Home page
 - Phase 2 outline still fits Phase 0 (scoped repos, field crypto, audit, rate limit, email outbox all in place). Detailed Phase 2 tasks still written in 1.9.
 - Files: docs/PLAN.md, docs/progress.md.
 
-## 0.8 Rate limit + public-form guard - done 2026-10-19
-- Done: `src/server/data/rate-limits.ts` `incrementRateLimit` (upsert `$inc` on key+windowStart, retries once on E11000 race). `src/server/rate-limit.ts` (server-only): `checkRateLimit(scope, id, rule, deps)` fixed window, increment-then-check, `expiresAt` = window end (TTL index); `rateLimitKey` = HMAC-SHA256(AUTH_SECRET) of scope+lowercased id, so no raw IP/email stored; `RATE_LIMITS` (signInEmail 5/15m, signInIp 20/15m, publicForm 10/h), `rateLimit(scope, id)`, `clientIp(headers)`.
-- `guardPublicForm(form, opts)`: honeypot `website` must be empty; `formToken` = signed server render time (`publicFormToken()`), min fill 3s, max age 24h; Origin vs APP_URL only when `headers` passed (route handlers). Returns `{ok}` or `{ok:false, reason}` (loggable code).
-- Sign-in action now rate-limited by IP then email -> `?error=RateLimited` (generic message on page).
-- Files: src/server/{rate-limit,data/rate-limits}.ts, test/rate-limit.test.ts, src/app/(public)/sign-in/{actions.ts,page.tsx}, docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/rate-limit.test.ts` 7/7 pass (limit, reset next window, per-id buckets, hashed key + TTL expiry, 5 concurrent first hits -> count 5 / 3 allowed, honeypot, too fast/expired/missing/forged token, Origin).
-- Open: sign-in form has no honeypot/token yet (needs page hidden fields; apply with first public form). Sign-in limit not exercised through the action (no test of the server action). `clientIp` trusts x-forwarded-for: fine behind Vercel/proxy, spoofable if exposed directly. CSP headers (PRD §13.5) not done: not in any task yet.
-
+- 0.8 Rate limit + public-form guard - done 2026-10-19: fixed-window `checkRateLimit` (HMAC keys, TTL), `guardPublicForm` (honeypot, signed formToken, Origin); sign-in rate-limited. Sign-in honeypot/token and CSP still open.
 - 0.7c Sign-in + outbox pages - done 2026-10-19: `/sign-in` magic-link form + server action, check-email page, dev-only `/dev/outbox`, "not configured" state.
 - 0.7b Auth.js core - done 2026-10-19: Mongo adapter, DB sessions, email magic link, `user_roles` -> session roles, `getAuthContext()`.
 - 0.7a Email transport - done 2026-10-19: `email_outbox` + TTL, `sendEmail` (Resend or dev outbox, refuses in prod without Resend), `EmailNotConfiguredError`.
