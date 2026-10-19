@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
-import { usePathname } from "next/navigation";
+import { OnRouteChange } from "@/components/motion/on-route-change";
 
 /** Scroll distance (px) before direction changes count; stops jitter on trackpads. */
 const DIRECTION_SLOP = 6;
@@ -18,7 +18,7 @@ const DIRECTION_SLOP = 6;
  */
 export function HeaderScroll({ className, children }: { className?: string; children: ReactNode }) {
   const ref = useRef<HTMLElement>(null);
-  const pathname = usePathname();
+  const updateRef = useRef<() => void>(undefined);
 
   useEffect(() => {
     const header = ref.current;
@@ -46,18 +46,25 @@ export function HeaderScroll({ className, children }: { className?: string; chil
     const reveal = () => header.removeAttribute("data-hidden");
 
     update();
+    updateRef.current = () => {
+      lastY = window.scrollY;
+      update();
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     header.addEventListener("focusin", reveal);
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener("scroll", onScroll);
       header.removeEventListener("focusin", reveal);
+      updateRef.current = undefined;
     };
-  }, [pathname]);
+  }, []);
 
   return (
     <header ref={ref} className={className}>
       {children}
+      {/* New page: re-detect the hero under the header. */}
+      <OnRouteChange onChange={() => updateRef.current?.()} />
     </header>
   );
 }

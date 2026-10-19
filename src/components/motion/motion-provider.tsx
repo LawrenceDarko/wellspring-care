@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import { gsap, ScrollTrigger } from "./gsap";
+import { OnRouteChange } from "./on-route-change";
 import { useReducedMotion } from "./use-reduced-motion";
 
 /** Radix scroll lock (dialogs, mobile nav) marks the body; Lenis must not scroll the page behind it. */
@@ -16,7 +16,6 @@ const SCROLL_LOCK_ATTR = "data-scroll-locked";
  */
 export function MotionProvider({ children }: { children?: ReactNode }) {
   const reduced = useReducedMotion();
-  const pathname = usePathname();
 
   useEffect(() => {
     if (reduced) return;
@@ -45,9 +44,12 @@ export function MotionProvider({ children }: { children?: ReactNode }) {
     };
   }, [reduced]);
 
-  useEffect(() => {
-    ScrollTrigger.refresh();
-  }, [pathname]);
-
-  return children;
+  return (
+    <>
+      {children}
+      <OnRouteChange onChange={refreshTriggers} />
+    </>
+  );
 }
+
+const refreshTriggers = () => ScrollTrigger.refresh();
