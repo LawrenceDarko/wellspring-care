@@ -113,6 +113,11 @@
   --band-gold: #d2b46a; /* season markers and rules on the band */
   /* Sticky header height (ADR 007 Nav): `h-header`, and the hero pulls up under it with `-mt-header`. */
   --header-h: 4rem;
+  /* Motion tokens (ADR 007). GSAP twins live in `MOTION` (src/components/motion/gsap.ts):
+     `--ease-story` = quart-out = GSAP `power3.out`. */
+  --ease-story: cubic-bezier(0.25, 1, 0.5, 1);
+  --duration-menu: 420ms;
+  --duration-reveal: 900ms;
 }
 
 @media (width >= 64rem) {
@@ -172,7 +177,25 @@ html {
   }
 }
 @utility menu-stagger {
-  animation: menu-rise 420ms cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--i, 0) * 40ms) both;
+  animation: menu-rise var(--duration-menu) var(--ease-story) calc(var(--i, 0) * 40ms) both;
+}
+
+/* Lenis smooth scroll (MotionProvider adds these classes to <html>; ADR 007). */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
 }
 
 /* Fraunces display treatment: soft axis, tight tracking at large sizes (ADR 006). */

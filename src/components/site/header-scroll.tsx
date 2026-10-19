@@ -11,7 +11,8 @@ const DIRECTION_SLOP = 6;
  * - `data-over-hero` while a `[data-hero]` element is still under the header,
  * - `data-scrolled` once the page has moved,
  * - `data-hidden` on scroll down, cleared on scroll up, on focus inside, or while a menu is open.
- * A passive scroll listener batched to one frame; no GSAP (1.10c may move this onto Lenis).
+ * A passive scroll listener batched to one frame; no GSAP. Lenis (MotionProvider) moves native
+ * window scroll, so this listener sees smooth scrolling too.
  * Without JS the header stays solid and visible.
  */
 export function HeaderScroll({ className, children }: { className?: string; children: ReactNode }) {

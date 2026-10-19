@@ -1,4 +1,5 @@
 import { cacheLife, cacheTag } from "next/cache";
+import { MotionProvider } from "@/components/motion";
 import { SiteFooter } from "@/components/site/site-footer";
 import { MAIN_CONTENT_ID, SiteHeader, SkipLink } from "@/components/site/site-header";
 import { ConfigError } from "@/server/config";
@@ -24,13 +25,13 @@ async function loadSettings(): Promise<SiteSettings> {
 export default async function PublicLayout({ children }: LayoutProps<"/">) {
   const settings = await loadSettings();
   return (
-    <>
+    <MotionProvider>
       <SkipLink />
       <SiteHeader siteName={settings.name} />
       <main id={MAIN_CONTENT_ID} tabIndex={-1} className="flex flex-1 flex-col pb-16 focus:outline-none md:pb-24">
         {children}
       </main>
       <SiteFooter settings={settings} />
-    </>
+    </MotionProvider>
   );
 }

@@ -1,8 +1,15 @@
 # Progress
 
-Current task: 1.10c Motion foundation (then 1.10d-h, GATE, then 2.1)
+Current task: 1.10d Vector art set (then 1.10e-h, GATE, then 2.1)
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.10c Motion foundation - done 2026-10-19
+- Done: `src/components/motion/`: `gsap.ts` (registers ScrollTrigger + useGSAP once, `MOTION` tokens: `power3.out`, reveal 0.9s/24px/"top 85%"), `useReducedMotion` (useSyncExternalStore; server/hydration and missing matchMedia = reduced, so motion starts after hydration), `MotionProvider` (Lenis `autoRaf:false` on the GSAP ticker -> `ScrollTrigger.update`, none under reduced motion, stops while body has `data-scroll-locked` (Radix dialogs), `ScrollTrigger.refresh()` on pathname change), `Reveal` (gsap.from opacity+y, once; opacity only so links stay focusable), `Parallax` (`speed` = share of viewport height, scrubbed, `invalidateOnRefresh`). Barrel `index.ts`.
+- Mounted around the public layout. CSS: `--ease-story` (quart-out = power3.out), `--duration-menu|reveal` in :root, `menu-stagger` uses them, Lenis html rules. `/dev/ui` "Motion" block (parallax band + five reveals). Header scroll unchanged (Lenis moves native scroll).
+- Files: src/components/motion/{gsap.ts,use-reduced-motion.ts,motion-provider.tsx,reveal.tsx,parallax.tsx,index.ts}, src/app/(public)/layout.tsx, src/app/globals.css, src/app/dev/ui/page.tsx, src/components/site/header-scroll.tsx (comment), test/motion.test.tsx, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/motion.test.tsx test/site-shell.test.tsx test/contrast.test.ts test/home.test.tsx` 28/28 (motion 6: SSR has no style/opacity/transform, missing matchMedia = reduced, reduced -> no inline styles + no Lenis, motion on -> reveal opacity 0 not visibility, Lenis started/stopped on scroll lock/destroyed). `check:contrast` 28/28.
+- Open: not run in a browser (no dev server in this task); `data-scroll-locked` attr name assumed from react-remove-scroll-bar, verify in 1.10 GATE (page must not scroll behind the mobile overlay). Lenis anchors off: hash jumps are native (scroll-padding-top applies). Reveals of elements already in view on load blink once (JS from-state after paint).
 
 ## 1.10b Header + nav redesign - done 2026-10-19
 - Done: `nav.ts` `NAV_GROUPS` (Care: Services, Chaplaincy, Weddings, Funerals & memorials; Programs & events: Programs, Events & retreats, Resources; Prayer, About, Contact) with one-line descriptions from page copy, `REQUEST_CARE` (/services), `MAIN_NAV` now flattened from groups (sentence case labels). shadcn navigation-menu added (focus ring made solid, trigger restyled quiet + 44px, removed its focus-ring suppression on links).
@@ -37,13 +44,7 @@ Current task: 1.10c Motion foundation (then 1.10d-h, GATE, then 2.1)
 - Tests: typecheck pass; eslint clean; `npx vitest run test/content-pages.test.tsx test/legal-pages.test.tsx test/form-guard.test.tsx test/contact.test.ts test/site-shell.test.tsx test/contrast.test.ts` 48/48 pass (new: measure/lede/hairline, margin note order, no all-caps, draft notice in margin). `check:copy` ok.
 - Open: not rendered in a browser (360/1280 in 1.9 GATE). Content pages pass no `note` yet. Sign-in page not unit tested (async server component).
 
-## 1.9d Services restyle - done 2026-10-19
-- Done: directory per ADR 006: book-page header (h1, lede, scope note in margin column), quiet category filter (rounded-md, pale-moss selected, same `?category=` hrefs + `aria-current`). "All" view grouped by life season (`groupServicesBySeason` in services.tsx: season order, unmapped -> "Other care" last, empty seasons dropped), each a `<section id="season-<key>">` with gold numbered marker (aria-hidden, number = position in SEASONS) + season line; services as rows (name, summary, category, price), no cards. Filtered view: category h2 + summary + rows.
-- Detail: main column (breadcrumb, h1, summary, price, CTA as plain link, no nowrap Button) + margin aside "Who this is for" (eligibility + pastoral-care note), packages below a gold hairline as the only `rounded-lg` cards (2 col max).
-- Files: src/components/site/services.tsx, src/app/(public)/services/[slug]/page.tsx (fallback padding), test/services.test.tsx, docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/services.test.tsx test/home.test.tsx test/seasons.test.ts` 16/16 pass (new: season grouping order + anchors + no cards in directory; aside holds eligibility + scope note; package card is the only card). `check:copy` ok.
-- Open: not rendered in a browser (360/1280 checked in 1.9 GATE). Marriage season has no categories, so `#season-marriage` never renders (home links it to /weddings). Category chips not ordered by season.
-
+- 1.9d Services restyle - done 2026-10-19: directory grouped by life season (`groupServicesBySeason`, `#season-<key>`, gold markers, rows not cards), quiet category filter, detail with margin aside + package cards.
 - 1.9c Home restyle - done 2026-10-19: forest-band hero (tagline, CTAs, pastoral-only note) + life-seasons `<ol>` path (`src/domain/seasons.ts`), book-page `Section`s below, no cards; header nav on its own row from xl.
 - 1.9b Shell restyle - done 2026-10-19: Fraunces wordmark header, nav from `xl`, linen Sheet menu below `xl`, forest band footer (contact, emergency, legal); 44px targets, focus on band.
 - 1.9a Design direction - done 2026-10-19: ADR 006 (life-seasons path, refined palette, book-page layout, 8 UI rules), linen/charcoal/moss tokens + `band*`, type scale + `max-w-measure`, PLAN tasks 1.9b-e.
