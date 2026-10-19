@@ -1,8 +1,14 @@
 # Progress
 
-Current task: 1.9b Shell restyle (then 1.9c-e, then 1.9 GATE)
+Current task: 1.9c Home restyle (then 1.9d-e, then 1.9 GATE)
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.9b Shell restyle - done 2026-10-19
+- Done: header wordmark in Fraunces (`text-h3`, SOFT 50), quiet desktop nav (muted, gold hover underline, 44px targets) now from `xl` (10 links don't fit at 1024); below `xl` a ghost "Menu" button opens a linen sheet (site name title, 44px rows, pale-moss hover). Footer is a forest `band`: name + tagline + pastoral-only line, gold hairlines, three sections (Contact + "Send us a message" link, "If it is urgent" with EmergencyNotice, Policies legal nav), copyright. `<main>` gets bottom padding so pages don't butt the band.
+- Files: src/components/site/{site-header,mobile-nav,site-footer}.tsx, src/app/(public)/layout.tsx, test/site-shell.test.tsx, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/site-shell.test.tsx test/contrast.test.ts test/home.test.tsx test/content-pages.test.tsx` 21/21 pass (skip link first focusable; new: footer has `band` + every footer link has `focus-visible:outline-2 outline-ring`; nav/menu 44px). `check:contrast` 28/28; `check:copy` ok.
+- Open: not rendered (class-level checks only; real focus visibility + 360/1280 layout in 1.9 GATE Playwright). No `aria-current` on nav (header is a server component). Sign-in link not in header yet.
 
 ## 1.9a Design direction - done 2026-10-19
 - Done: ADR 006 (life-seasons path as the one signature device, refined PRD palette, book-page layout, 8 UI rules) from `.claude/skills/frontend-design` (installed from anthropics/skills). Tokens: linen bg `#f6f5ef`, charcoal `#262624`, moss secondary, pale-moss accent (gold now rules/markers only), new `band`/`band-foreground`/`band-muted`/`band-gold`. Type scale in `@theme` (`text-body` 17px/1.65, `text-lede`, `text-h3..h1`, fluid `text-display`), `max-w-measure` 65ch, `type-display` + `band` utilities (band swaps focus ring to linen). Body defaults to `text-body`; headings `text-wrap: balance`.
@@ -34,13 +40,7 @@ Current task: 1.9b Shell restyle (then 1.9c-e, then 1.9 GATE)
 - Tests: typecheck pass; eslint clean; `npx vitest run test/content-pages.test.tsx` 5/5 pass (pending block shown in development/test, nothing incl. heading in production, MDX component map + override, internal/external links).
 - Open: MDX compile not exercised (vitest tests components, not .mdx; no dev server/build until 1.9 GATE). Copy is draft for org review (1.7 copy-check should scan src/content). Links to /contact and /services only; no renewal landing or prayer form yet. About ethics section mentions reporting duties generically pending counsel.
 
-## 1.5 Services directory + detail - done 2026-10-19
-- Done: `/services` directory (category chips, `?category=<slug>` is the only param, `aria-current` on filter, unknown category -> status note + all services, "From $X" or "Pricing on request") and `/services/[slug]` detail (breadcrumb, starting price, eligibility + pastoral-care-only note, package cards: price, sessions, duration, channels, response time, inclusions, deposit/installments, "Request this service" -> `/request/<slug>`). Both pages: Suspense + `"use cache"` tag `catalog`, cacheLife minutes, ConfigError -> empty/404.
-- Repository: `startingPrice(packages)`; `listServices` and `getServiceBySlug` add `startingPrice` (cheapest active package; absent when none). `slugParam` rejects malformed slugs before any DB read.
-- Files: src/server/data/catalog.ts, src/components/site/services.tsx, src/app/(public)/services/{page.tsx,[slug]/page.tsx}, test/{services.test.tsx,catalog.test.ts}, docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/services.test.tsx test/catalog.test.ts test/home.test.tsx` 19/19 pass (slug param validation, directory links/filter/empty/unknown, detail packages/price/eligibility/request href, inactive package excluded from starting price).
-- Open: not rendered with dev server or `next build` (Suspense + params under cacheComponents unverified until 1.9 GATE). `/request/<slug>` 404s until Phase 2 intake (route name chosen here, Phase 2 should use it). Price is per package currency; mixed currencies not compared. Admin catalog writes must `revalidateTag("catalog")`.
-
+- 1.5 Services directory + detail - done 2026-10-19: `/services` (category chips, `?category=`) + `/services/[slug]` with packages, `startingPrice`, `slugParam`; request href `/request/<slug>` (404 until Phase 2).
 - 1.4 Home page - done 2026-10-19: `HomeSections` per PRD §4.3, `events`/`testimonials` collections (publish needs consent), cached loader with defaults on ConfigError.
 - 1.3 Catalog data + seed - done 2026-10-19: catalog zod + validators, public `listCategories`/`listServices`/`getServiceBySlug`, `seedCatalog` (20 services, packages inactive, $setOnInsert), `db:seed`.
 - 1.2 Site shell - done 2026-10-19: `getSettings` over defaults, public layout (skip link, header, mobile Sheet nav, footer with 911/988 + legal links), Testing Library + jsdom dev deps.

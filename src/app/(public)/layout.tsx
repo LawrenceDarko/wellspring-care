@@ -27,7 +27,7 @@ export default async function PublicLayout({ children }: LayoutProps<"/">) {
     <>
       <SkipLink />
       <SiteHeader siteName={settings.name} />
-      <main id={MAIN_CONTENT_ID} tabIndex={-1} className="flex flex-1 flex-col focus:outline-none">
+      <main id={MAIN_CONTENT_ID} tabIndex={-1} className="flex flex-1 flex-col pb-16 focus:outline-none md:pb-24">
         {children}
       </main>
       <SiteFooter settings={settings} />

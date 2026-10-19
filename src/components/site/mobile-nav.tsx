@@ -19,23 +19,30 @@ export function MobileNav({ links, siteName }: { links: readonly NavLink[]; site
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="lg:hidden" aria-label="Open menu">
-          <MenuIcon aria-hidden="true" />
+        <Button
+          variant="ghost"
+          className="min-h-11 gap-2 rounded-md px-3 text-base xl:hidden"
+          aria-label="Open menu"
+        >
+          <MenuIcon aria-hidden="true" className="size-5" />
+          <span aria-hidden="true">Menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-72">
-        <SheetHeader>
-          <SheetTitle>Menu</SheetTitle>
-          <SheetDescription className="sr-only">{siteName} site navigation</SheetDescription>
+      <SheetContent side="right" className="w-80 max-w-[85vw] bg-background">
+        <SheetHeader className="border-b border-border px-6 py-5">
+          <SheetTitle className="font-display text-h3 font-medium tracking-tight text-primary">
+            {siteName}
+          </SheetTitle>
+          <SheetDescription className="sr-only">Site navigation</SheetDescription>
         </SheetHeader>
-        <nav aria-label="Mobile" className="px-4">
-          <ul className="flex flex-col gap-1">
+        <nav aria-label="Mobile" className="overflow-y-auto px-3 pb-6">
+          <ul className="flex flex-col">
             {links.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="block rounded-lg px-3 py-2 text-base hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring"
+                  className="flex min-h-11 items-center rounded-md px-3 text-lede hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring"
                 >
                   {link.label}
                 </Link>

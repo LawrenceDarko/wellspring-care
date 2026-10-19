@@ -73,4 +73,24 @@ describe("site shell", () => {
     );
     expect(within(footer).queryByText("Contact details are not configured yet.")).toBeNull();
   });
+
+  it("footer is a forest band and every footer link gets a visible focus outline in the ring color", () => {
+    render(<Shell />);
+    const footer = screen.getByRole("contentinfo");
+    // `band` swaps --ring to linen, so outline-ring stays visible on forest (ADR 006).
+    expect(footer.classList.contains("band")).toBe(true);
+    const links = within(footer).getAllByRole("link");
+    expect(links.length).toBeGreaterThan(0);
+    for (const link of links) {
+      expect(link.className).toMatch(/focus-visible:outline-2/);
+      expect(link.className).toMatch(/focus-visible:outline-ring/);
+    }
+  });
+
+  it("header nav links and menu button meet 44px targets", () => {
+    render(<Shell />);
+    const nav = screen.getByRole("navigation", { name: "Main" });
+    for (const link of within(nav).getAllByRole("link")) expect(link.className).toMatch(/min-h-11/);
+    expect(screen.getByRole("button", { name: "Open menu" }).className).toMatch(/min-h-11/);
+  });
 });
