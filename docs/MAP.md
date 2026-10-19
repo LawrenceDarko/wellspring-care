@@ -16,7 +16,6 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `src/app/globals.css` - Tailwind v4 + shadcn; brand tokens (hex, light only) in :root, `@theme inline` mapping (`gold`, `font-display`); reduced-motion rule. Check with `npm run check:contrast`.
 - `src/app/(public)/layout.tsx` - public shell: SkipLink, SiteHeader, `<main id="main">`, SiteFooter; settings via `"use cache"` tag `organization-settings` (defaults on ConfigError). Pages render `<div>`, not `<main>`.
 - `src/app/(public)/page.tsx` - placeholder home with pastoral-care-only notice.
-- `src/app/(portal)/`, `src/app/(staff)/` - empty (.gitkeep).
 - `src/app/api/auth/[...nextauth]/route.ts` - Auth.js GET/POST handlers.
 - `src/app/(public)/sign-in/` - magic-link form (`page.tsx`, server action `requestMagicLink` in `actions.ts`), `check-email/page.tsx`. "Not configured" state on missing env.
 - `src/app/dev/outbox/page.tsx` - dev-only outbox viewer (404 in production). `src/app/dev/ui/page.tsx` - token + component preview (404 in production).
@@ -38,11 +37,10 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `src/server/rate-limit.ts` - server-only PRD §13.5. `rateLimit(scope, id)`, `checkRateLimit`, `RATE_LIMITS`, `clientIp`, `guardPublicForm(form, {headers?})`, `publicFormToken()` (render as hidden `formToken`), `HONEYPOT_FIELD`. Store: `src/server/data/rate-limits.ts` `incrementRateLimit`.
 - `src/server/payments/` - empty (.gitkeep).
 - `src/components/site/` - `nav.ts` (`MAIN_NAV`, `LEGAL_NAV`), `site-header.tsx` (`SkipLink`, `SiteHeader`, `MAIN_CONTENT_ID`), `mobile-nav.tsx` (client Sheet), `site-footer.tsx` (`SiteFooter`, `EmergencyNotice` 911/988).
-- `src/server/data/schemas/catalog.ts` - catalog zod + validators: `service_categories`, `services`, `service_packages` (`CHANNELS`, `depositRuleSchema`, price in cents).
-- `src/server/data/catalog.ts` - public catalog read (active only): `listCategories`, `listServices({categorySlug?})`, `getServiceBySlug` (with active packages), types `Public*`.
+- `src/server/data/schemas/catalog.ts` - zod + validators for `service_categories`, `services`, `service_packages` (`CHANNELS`, cents). `src/server/data/catalog.ts` - public catalog read (active only): `listCategories`, `listServices({categorySlug?})`, `getServiceBySlug` (with active packages), types `Public*`.
 - `src/server/data/settings.ts` - public `getSettings(db?)` (org settings merged over `SETTINGS_DEFAULTS`), type `SiteSettings`.
 - `src/components/ui/` - shadcn (radix, `components.json`): button, card, input, label, textarea, select, dialog, badge, sheet. `cn` from package `cn` (also `@/lib/utils`). Keep focus rings solid (`ring-ring`, no `/50`).
-- `src/domain/`, `src/content/` - empty (.gitkeep).
+- `src/domain/`, `src/content/`, `src/app/(portal)/`, `src/app/(staff)/` - empty (.gitkeep).
 
 ## scripts/
 - `scripts/db-ensure.ts` - applies registry via `ensureCollections`; needs only MONGODB_URI/MONGODB_DB (`.env.local` auto-loaded).
@@ -58,6 +56,5 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `test/rate-limit.test.ts` - fixed window limit/reset/concurrency, honeypot, form token, Origin. `test/email.test.ts` - transport selection, production refusal, outbox write/TTL/validators.
 - `test/helpers/mongo.ts` - `startMongo()` -> `{ uri, client, db, stop }` on MongoMemoryReplSet. `test/helpers/server-only.ts`, `test/helpers/next-font.ts` - stubs vitest aliases `server-only` / `next/font/google` to.
 - `test/contrast.test.ts` - token contrast pairs, light only, solid focus ring in ui components.
-- `test/catalog.test.ts` - seed idempotency, inactive packages/services hidden from public read.
-- `test/settings.test.ts`, `test/site-shell.test.tsx` - settings defaults/merge; shell keyboard + footer (jsdom + Testing Library, `// @vitest-environment jsdom`).
+- `test/catalog.test.ts` (seed idempotent, inactive hidden), `test/settings.test.ts`, `test/site-shell.test.tsx` - settings defaults/merge; shell keyboard + footer (jsdom + Testing Library, `// @vitest-environment jsdom`).
 - `test/e2e/` - Playwright specs (empty).
