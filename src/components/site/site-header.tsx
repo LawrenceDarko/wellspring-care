@@ -20,20 +20,21 @@ export function SkipLink() {
 export function SiteHeader({ siteName }: { siteName: string }) {
   return (
     <header className="border-b border-border bg-background">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-6 px-4 py-4 md:px-6">
+      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-1 px-4 py-3 md:px-6 xl:py-4">
         <Link
           href="/"
-          className="inline-flex min-h-11 items-center rounded-md font-display text-h3 font-medium tracking-tight text-primary [font-variation-settings:'SOFT'_50] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          className="inline-flex min-h-11 items-center rounded-md font-display text-lede font-medium leading-snug md:text-h3 tracking-tight text-primary [font-variation-settings:'SOFT'_50] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           {siteName}
         </Link>
-        <nav aria-label="Main" className="hidden xl:block">
-          <ul className="flex items-center gap-x-1 text-[0.9375rem]">
+        {/* Own row from xl: a long org name and ten links never squeeze each other. */}
+        <nav aria-label="Main" className="hidden xl:block xl:basis-full">
+          <ul className="-ml-2.5 flex flex-wrap items-center gap-x-1 text-[0.9375rem]">
             {MAIN_NAV.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="inline-flex min-h-11 items-center rounded-md px-2.5 text-muted-foreground underline-offset-[6px] hover:text-foreground hover:underline hover:decoration-gold focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+                  className="inline-flex min-h-11 items-center rounded-md px-2.5 whitespace-nowrap text-muted-foreground underline-offset-[6px] hover:text-foreground hover:underline hover:decoration-gold focus-visible:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
                 >
                   {link.label}
                 </Link>

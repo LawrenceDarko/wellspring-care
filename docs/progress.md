@@ -1,8 +1,16 @@
 # Progress
 
-Current task: 1.9c Home restyle (then 1.9d-e, then 1.9 GATE)
+Current task: 1.9d Services restyle (then 1.9e, then 1.9 GATE)
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.9c Home restyle - done 2026-10-19
+- Done: full home redesign per ADR 006. Forest-band hero: tagline in `type-display`, lede, CTAs "Request spiritual care" (/services) + "Explore programs" (/programs) as plain wrapping links (old Button had `whitespace-nowrap`), pastoral-only note, then the life-seasons path: labelled `<ol>` of 5 season links with gold numbered markers (aria-hidden) joined by a gold rule (down on mobile, across from lg), DB categories listed under their season. Below: book-page `Section` (gold hairline, optional margin note, `wide` for lists): renewal formats `dl` + margin note, ceremonies/families/chaplaincy 2-col list, events rows, testimonials as quotes, mission + values `dl`. No cards.
+- `src/domain/seasons.ts`: `SEASONS` (marriage, family, renewal, illness, loss; category slugs + href `/services#season-<key>`, marriage -> /weddings), `seasonForCategory`, `groupBySeason`.
+- Header fix (1.9b file, user-reported overflow): nav on its own row from xl with nowrap labels; wordmark `text-lede` on mobile.
+- Files: src/domain/seasons.ts, src/components/site/{home,site-header}.tsx, test/{home,seasons}.test.ts(x), docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/home.test.tsx test/seasons.test.ts test/site-shell.test.tsx` 15/15 pass; `check:copy` ok. Rendered on user's dev server (:3000) in Chrome at 360/768/1280: scrollWidth == viewport, no element past the edge.
+- Open: rendered without DB (no categories under seasons, events/testimonials hidden). `/services#season-*` anchors land in 1.9d. CTA labels now sentence case (PRD §4.3 quotes title case). Tagline title case comes from settings data.
 
 ## 1.9b Shell restyle - done 2026-10-19
 - Done: header wordmark in Fraunces (`text-h3`, SOFT 50), quiet desktop nav (muted, gold hover underline, 44px targets) now from `xl` (10 links don't fit at 1024); below `xl` a ghost "Menu" button opens a linen sheet (site name title, 44px rows, pale-moss hover). Footer is a forest `band`: name + tagline + pastoral-only line, gold hairlines, three sections (Contact + "Send us a message" link, "If it is urgent" with EmergencyNotice, Policies legal nav), copyright. `<main>` gets bottom padding so pages don't butt the band.
@@ -32,14 +40,7 @@ Current task: 1.9c Home restyle (then 1.9d-e, then 1.9 GATE)
 - Tests: typecheck pass; eslint clean; `npx vitest run test/legal-pages.test.tsx test/content-pages.test.tsx` 25/25 pass (banner before body, every LEGAL_NAV route + MDX exists, copy-check passes on all content, 8 banned phrases flagged, negation scoped to sentence, TodoOrg/comments skipped, emergency notice required). `npm run check:copy` -> ok.
 - Open: MDX pages not rendered (no dev server/build until 1.9 GATE). Retention periods quote PRD §13.7 defaults (ADR not written yet). Copy-check is a heuristic: a negation anywhere earlier in the sentence excuses a phrase. Contact page (1.8) is .tsx and is in scan scope; emergency notice on Contact is not enforced by the script.
 
-## 1.6 Content pages - done 2026-10-19
-- Done: MDX via `@next/mdx` (`next.config.ts` `createMDX({})`, `src/mdx-components.tsx`). Six pages import `src/content/<page>.mdx` into `<ContentPage>`: /about, /chaplaincy, /weddings, /funerals, /programs, /prayer (static explainer, form in Phase 2, emergency notice). `src/components/site/content.tsx`: `TodoOrg` (pending block "Content pending - TODO(org)", optional section heading; returns null when NODE_ENV=production), `contentComponents` (styled headings/lists, internal links via next/link, `TodoOrg`, `EmergencyNotice`).
-- TodoOrg placeholders: mission/vision, history, leadership, credentials, statement of faith, ethics/reporting duties, facilities served, community settings, officiants, ceremony types, hardship policy, cohorts/prices.
-- New deps (user approved, ADR 001 row): @next/mdx 16.4.2, @mdx-js/loader 3.1.1, @mdx-js/react 3.1.1, @types/mdx 2.0.14 (dev).
-- Files: next.config.ts, src/mdx-components.tsx, src/components/site/content.tsx, src/content/*.mdx (6), src/app/(public)/{about,chaplaincy,weddings,funerals,programs,prayer}/page.tsx, test/content-pages.test.tsx, package.json, docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/content-pages.test.tsx` 5/5 pass (pending block shown in development/test, nothing incl. heading in production, MDX component map + override, internal/external links).
-- Open: MDX compile not exercised (vitest tests components, not .mdx; no dev server/build until 1.9 GATE). Copy is draft for org review (1.7 copy-check should scan src/content). Links to /contact and /services only; no renewal landing or prayer form yet. About ethics section mentions reporting duties generically pending counsel.
-
+- 1.6 Content pages - done 2026-10-19: MDX via `@next/mdx`, six pages in `ContentPage`, `TodoOrg` pending blocks (hidden in production), `contentComponents`.
 - 1.5 Services directory + detail - done 2026-10-19: `/services` (category chips, `?category=`) + `/services/[slug]` with packages, `startingPrice`, `slugParam`; request href `/request/<slug>` (404 until Phase 2).
 - 1.4 Home page - done 2026-10-19: `HomeSections` per PRD §4.3, `events`/`testimonials` collections (publish needs consent), cached loader with defaults on ConfigError.
 - 1.3 Catalog data + seed - done 2026-10-19: catalog zod + validators, public `listCategories`/`listServices`/`getServiceBySlug`, `seedCatalog` (20 services, packages inactive, $setOnInsert), `db:seed`.
