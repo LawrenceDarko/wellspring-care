@@ -1,8 +1,15 @@
 # Progress
 
-Current task: 1.3 Catalog data + seed
+Current task: 1.4 Home page
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.3 Catalog data + seed - done 2026-10-19
+- Done: `schemas/catalog.ts` zod + `$jsonSchema` for `service_categories`, `services`, `service_packages` (price in cents, `depositRule` none/percent/fixed, `channels` enum, optional `stripePriceId`); registry entries with slug-unique and order indexes (`service_slug_unique` per package). Public read `src/server/data/catalog.ts`: `listCategories`, `listServices({categorySlug?})`, `getServiceBySlug` (active only; services in inactive categories hidden; no `active`/`stripePriceId`/timestamps in output).
+- Seed: `scripts/seed/catalog.ts` `seedCatalog(db, {activatePackages?})`: 5 categories, the 20 PRD §5.2 services, fictional packages in PRD §8 ranges; upsert by slug with `$setOnInsert` only (re-run never overwrites admin edits); packages `active: false` unless dev flag. `npm run db:seed [-- --activate-packages]` (flag refused when NODE_ENV=production; now loads .env.local).
+- Files: src/server/data/{schemas/catalog.ts,catalog.ts,registry.ts}, scripts/{db-seed.ts,seed/catalog.ts}, test/catalog.test.ts, package.json, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/catalog.test.ts test/db-ensure.test.ts` 11/11 pass (seed idempotent + validators, all packages inactive, admin edits kept, dev flag activates, inactive packages/services/categories hidden, ordering + filter). `node scripts/db-seed.ts` without URI exits 1 with message (imports load).
+- Open: seed not run against a real DB (no local mongod). `intakeFormKey` values (general-care, hospice, family-couples) have no `intake_forms` yet (intake tasks). Service `bodyRef` copy not written. Prices are placeholders pending org review.
 
 ## 1.2 Site shell - done 2026-10-19
 - Done: `src/server/data/settings.ts` `getSettings(db?)` (public read of `organization_settings` key "default", public-field projection, stored values merged over frozen `SETTINGS_DEFAULTS`). `(public)/layout.tsx`: skip link, header, `<main id="main" tabIndex=-1>`, footer; settings loaded via `"use cache"` + `cacheTag("organization-settings")`, falls back to defaults on `ConfigError` (cacheLife minutes). Header: name from settings, desktop nav (lg+), mobile Sheet nav. Footer: contact from settings or "not configured yet", emergency notice (tel:911, tel:988), legal links, pastoral-care-only line.
@@ -36,12 +43,7 @@ Current task: 1.3 Catalog data + seed
 - Tests: typecheck pass; eslint clean; `npx vitest run test/rate-limit.test.ts` 7/7 pass (limit, reset next window, per-id buckets, hashed key + TTL expiry, 5 concurrent first hits -> count 5 / 3 allowed, honeypot, too fast/expired/missing/forged token, Origin).
 - Open: sign-in form has no honeypot/token yet (needs page hidden fields; apply with first public form). Sign-in limit not exercised through the action (no test of the server action). `clientIp` trusts x-forwarded-for: fine behind Vercel/proxy, spoofable if exposed directly. CSP headers (PRD §13.5) not done: not in any task yet.
 
-## 0.7c Sign-in + outbox pages - done 2026-10-19
-- Done: `/sign-in` (server component, Suspense): email form -> server action `requestMagicLink` (zod email, `signIn("email")`, callbackUrl limited to same-origin relative paths, Auth.js errors -> `?error=EmailSignin`, logged by `errorName` only). Generic messages per `?error=` code. Shows "Sign-in is not configured" when env is missing (ConfigError) or no email transport. `/sign-in/check-email` static page. `/dev/outbox`: `notFound()` in production, else `listOutboxEmails` newest first, links clickable, noindex.
-- Files: src/app/(public)/sign-in/{page,actions}.ts(x), src/app/(public)/sign-in/check-email/page.tsx, src/app/dev/outbox/page.tsx, docs.
-- Tests: typecheck pass; eslint clean. Dev server (port 3123, start/curl/kill): /sign-in 200 with form when MONGODB_URI+AUTH_SECRET+FIELD_ENC_KEY set; "not configured" when FIELD_ENC_KEY missing; `?error=Verification` shows expired-link message; /sign-in/check-email 200.
-- Open: /dev/outbox not exercised (no local mongod); no automated test for the pages or action. No rate limit on sign-in yet (0.8). Unstyled until 1.1 tokens/shadcn. Sign-in submit not tried end to end in a browser.
-
+- 0.7c Sign-in + outbox pages - done 2026-10-19: `/sign-in` magic-link form + server action, check-email page, dev-only `/dev/outbox`, "not configured" state.
 - 0.7b Auth.js core - done 2026-10-19: Mongo adapter, DB sessions, email magic link, `user_roles` -> session roles, `getAuthContext()`.
 - 0.7a Email transport - done 2026-10-19: `email_outbox` + TTL, `sendEmail` (Resend or dev outbox, refuses in prod without Resend), `EmailNotConfiguredError`.
 - 0.6 Field encryption + audit + logger - done 2026-10-19: AES-256-GCM `encryptField`/`decryptField` with kid + aad, allowlisted logger, `recordAudit` with meta allowlist.

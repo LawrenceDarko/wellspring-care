@@ -6,6 +6,7 @@ import {
   rateLimitValidator,
 } from "./schemas/system.ts";
 import { userRoleValidator } from "./schemas/identity.ts";
+import { serviceCategoryValidator, servicePackageValidator, serviceValidator } from "./schemas/catalog.ts";
 
 // PRD §3.1: single source of collection validators + indexes, applied by
 // `npm run db:ensure` and by test helpers. Every index has an explicit name so
@@ -52,6 +53,30 @@ export const collections: CollectionSpec[] = [
     name: "user_roles",
     validator: userRoleValidator,
     indexes: [{ key: { userId: 1, role: 1 }, name: "user_role_unique", unique: true }],
+  },
+  {
+    name: "service_categories",
+    validator: serviceCategoryValidator,
+    indexes: [
+      { key: { slug: 1 }, name: "slug_unique", unique: true },
+      { key: { active: 1, order: 1 }, name: "active_order" },
+    ],
+  },
+  {
+    name: "services",
+    validator: serviceValidator,
+    indexes: [
+      { key: { slug: 1 }, name: "slug_unique", unique: true },
+      { key: { categoryId: 1, active: 1, order: 1 }, name: "category_active_order" },
+    ],
+  },
+  {
+    name: "service_packages",
+    validator: servicePackageValidator,
+    indexes: [
+      { key: { serviceId: 1, slug: 1 }, name: "service_slug_unique", unique: true },
+      { key: { serviceId: 1, active: 1, order: 1 }, name: "service_active_order" },
+    ],
   },
 ];
 

@@ -12,7 +12,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "db:ensure": "node --env-file-if-exists=.env.local scripts/db-ensure.ts",
-    "db:seed": "node scripts/db-seed.ts",
+    "db:seed": "node --env-file-if-exists=.env.local scripts/db-seed.ts",
     "check:contrast": "node scripts/check-contrast.ts"
   },
   "dependencies": {
