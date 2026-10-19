@@ -1,6 +1,6 @@
 # Progress
 
-Current task: 1.10b Motion foundation (then 1.10c-i, GATE, then 2.1)
+Current task: 1.10b Header + nav redesign (then 1.10c-h, GATE, then 2.1)
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
 
@@ -10,7 +10,8 @@ Current task: 1.10b Motion foundation (then 1.10c-i, GATE, then 2.1)
 - PLAN.md: Phase 1.10 tasks 1.10b-h + GATE inserted before Phase 2.
 - Files: package.json, package-lock.json, docs/adr/{001,006,007,README}, docs/{PLAN,progress,MAP}.md.
 - Tests: `npm ls gsap @gsap/react lenis` clean; `npm run typecheck` pass. No code changed, no vitest run.
-- Open: nav grouping and "Request care" -> /services need user/org confirmation. Stock picks are sourced in 1.10g (RESEARCH). Install still blocks esbuild/fsevents/unrs-resolver/mongodb-memory-server scripts (as before).
+- Decided (user delegated): header first (now 1.10b, motion foundation 1.10c); Contact top level; "Request care" -> /services.
+- Open: Stock picks are sourced in 1.10g (RESEARCH). Install still blocks esbuild/fsevents/unrs-resolver/mongodb-memory-server scripts (as before).
 
 ## 1.9 GATE + write Phase 2 tasks - done 2026-10-19
 - Done: GATE on the ADR 006 UI. First Playwright spec `test/e2e/smoke.spec.ts`: home -> "Request spiritual care" -> /services -> first service detail -> /contact submit (waits 3.5s for the form guard), at 360 and 1280 px, asserting no horizontal scroll on each page.

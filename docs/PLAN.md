@@ -87,11 +87,11 @@ Markers: `RESEARCH` = web lookups allowed (cap 5). `GATE` = full suite, `next bu
 - **1.10a RESEARCH Motion + imagery direction** - ADR 007 (story, GSAP + Lenis, hero shader, vectors + stock, nav), pin gsap/@gsap/react/lenis in ADR 001, install, plan 1.10b-i.
   Accept: `npm ls` clean; typecheck.
 
-- **1.10b Motion foundation** - ADR 007 rules 1-4. `src/components/motion/`: `MotionProvider` (client; registers ScrollTrigger, Lenis on GSAP ticker, off under reduced motion, refresh on route change), `Reveal` (fade/rise on enter, JS sets the from-state), `Parallax` (speed prop, scrub), `useReducedMotion`. Easing/duration tokens in `globals.css`. Mount in `(public)/layout.tsx`. `/dev/ui` demo block.
-  Accept: jsdom tests: content visible with no JS / under reduced motion (no transform/opacity style set); provider skips Lenis under reduced motion.
-
-- **1.10c Header + nav redesign** - ADR 007 Nav. `nav.ts` grouped (`NAV_GROUPS`, flat `MAIN_NAV` kept for footer/sitemap), `npx shadcn add navigation-menu`, single-row sticky header (transparent over hero via `data-over-hero`, solid after scroll, hide-on-scroll-down), "Request care" button, full-screen forest mobile overlay with staggered links (instant under reduced motion). Files: `nav.ts`, `site-header.tsx`, `mobile-nav.tsx`, new `header-scroll.tsx`, test.
+- **1.10b Header + nav redesign** - ADR 007 Nav. `nav.ts` grouped (`NAV_GROUPS`, flat `MAIN_NAV` kept for footer/sitemap), `npx shadcn add navigation-menu`, single-row sticky header from `lg` (Care, Programs & events, Prayer, About, Contact, "Request care"; transparent over hero via `data-over-hero`, solid after scroll, hide-on-scroll-down with a passive scroll listener + CSS transitions, no GSAP dependency), "Request care" button, full-screen forest mobile overlay below `lg` with CSS-staggered links (instant under reduced motion); 1.10c may later move scroll state onto Lenis. Files: `nav.ts`, `site-header.tsx`, `mobile-nav.tsx`, new `header-scroll.tsx`, test.
   Accept: site-shell tests updated (skip link first focusable, every route reachable from both menus, Escape closes, focus returns to trigger, 44px targets).
+
+- **1.10c Motion foundation** - ADR 007 rules 1-4. `src/components/motion/`: `MotionProvider` (client; registers ScrollTrigger, Lenis on GSAP ticker, off under reduced motion, refresh on route change), `Reveal` (fade/rise on enter, JS sets the from-state), `Parallax` (speed prop, scrub), `useReducedMotion`. Easing/duration tokens in `globals.css`. Mount in `(public)/layout.tsx`. `/dev/ui` demo block.
+  Accept: jsdom tests: content visible with no JS / under reduced motion (no transform/opacity style set); provider skips Lenis under reduced motion.
 
 - **1.10d Vector art set** - ADR 007 Vectors. `src/components/art/landscape.tsx` (layer components: sky, far hills, near hills, spring/water, trees, birds; each a separate `<svg>` layer for parallax), `seasons-art.tsx` (five season vignettes). Token colors, `aria-hidden`, viewBox-responsive. `/dev/ui` specimen.
   Accept: render test (aria-hidden, no hard-coded hex outside tokens); 360/1280 no overflow on `/dev/ui`.
