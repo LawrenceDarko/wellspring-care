@@ -17,6 +17,8 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `src/app/(public)/page.tsx` - placeholder home with pastoral-care-only notice.
 - `src/app/(portal)/`, `src/app/(staff)/` - empty (.gitkeep).
 - `src/app/api/auth/[...nextauth]/route.ts` - Auth.js GET/POST handlers.
+- `src/app/(public)/sign-in/` - magic-link form (`page.tsx`, server action `requestMagicLink` in `actions.ts`), `check-email/page.tsx`. "Not configured" state on missing env.
+- `src/app/dev/outbox/page.tsx` - dev-only outbox viewer (404 in production).
 - `src/server/config.ts` - server-only zod env validation. Exports `parseConfig(env)`, `getConfig()` (cached), `ConfigError`, types `Env`, `Config` (`env`, `integrations.{stripe,email,googleCalendar}`).
 - `src/server/db.ts` - server-only Mongo client cached on globalThis. Exports `getClient()`, `getDb()`. Only repositories in `src/server/data/` may call it.
 - `src/server/auth/capabilities.ts` - pure role->capability map (PRD §2). Exports `ROLES`, `CAPABILITIES`, `ROLE_CAPABILITIES`, `capabilitiesFor(roles)`, `isRole`, types `Role`, `Capability`. Check capabilities, never role names.

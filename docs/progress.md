@@ -1,8 +1,14 @@
 # Progress
 
-Current task: 0.7c Sign-in + outbox pages
+Current task: 0.8 Rate limit + public-form guard
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 0.7c Sign-in + outbox pages - done 2026-10-19
+- Done: `/sign-in` (server component, Suspense): email form -> server action `requestMagicLink` (zod email, `signIn("email")`, callbackUrl limited to same-origin relative paths, Auth.js errors -> `?error=EmailSignin`, logged by `errorName` only). Generic messages per `?error=` code. Shows "Sign-in is not configured" when env is missing (ConfigError) or no email transport. `/sign-in/check-email` static page. `/dev/outbox`: `notFound()` in production, else `listOutboxEmails` newest first, links clickable, noindex.
+- Files: src/app/(public)/sign-in/{page,actions}.ts(x), src/app/(public)/sign-in/check-email/page.tsx, src/app/dev/outbox/page.tsx, docs.
+- Tests: typecheck pass; eslint clean. Dev server (port 3123, start/curl/kill): /sign-in 200 with form when MONGODB_URI+AUTH_SECRET+FIELD_ENC_KEY set; "not configured" when FIELD_ENC_KEY missing; `?error=Verification` shows expired-link message; /sign-in/check-email 200.
+- Open: /dev/outbox not exercised (no local mongod); no automated test for the pages or action. No rate limit on sign-in yet (0.8). Unstyled until 1.1 tokens/shadcn. Sign-in submit not tried end to end in a browser.
 
 ## 0.7b Auth.js core - done 2026-10-19
 - Done: `src/server/auth/index.ts` (server-only): `createAuthConfig(deps)` = MongoDB adapter (users/accounts/sessions/verification_tokens), `session.strategy: "database"`, email provider (15 min) sending `magicLinkEmail()` (generic subject, template `magic_link`) via `sendEmail()`, secure cookies forced in prod, pages signIn/error `/sign-in`, verifyRequest `/sign-in/check-email`. Session callback reads `user_roles` -> `session.user.{id, roles}`. `NextAuth(() => config)` lazy (no env at import): `handlers, auth, signIn, signOut`; `getAuthContext()` (React `cache`) -> `AuthContext | null`.
@@ -34,12 +40,7 @@ Current task: 0.7c Sign-in + outbox pages
 - Tests: typecheck pass; eslint clean; `npx vitest run test/authz` 14/14 pass (role map, multi-role union, super_admin no reflection cap, 401/403, IDOR null, filter can't widen scope, out-of-scope writes no-op, unscoped refused, assigned needs cap+assignment).
 - Open: `requireUser` takes a ctx; session -> AuthContext loader (Auth.js + user_roles + assignments) comes with the auth task. No scoped insert helper yet (inserts must stamp owner in each repo). Extra super_admin caps (audit/settings/content/roles) are my naming, not in PRD table.
 
-## 0.4 Mongo client + ensure script - done 2026-10-19
-- Done: `src/server/db.ts` (server-only) `getClient()`/`getDb()` cached on `globalThis` (connect promise reset on failure). `src/server/data/schemas/system.ts`: zod schema + hand-written `$jsonSchema` (strict, `additionalProperties: false`) for `organization_settings` (singleton via `key: "default"` + unique index), `audit_logs`, `rate_limits` (TTL `expiresAt`, unique key+window). `src/server/data/registry.ts`: `collections` + `ensureCollections(db)` (createCollection or collMod, named indexes). `scripts/db-ensure.ts` reads only MONGODB_URI/MONGODB_DB; `db:ensure` loads `.env.local` if present.
-- Files: src/server/db.ts, src/server/data/{registry.ts,schemas/system.ts}, scripts/db-ensure.ts, test/helpers/mongo.ts, test/db-ensure.test.ts, package.json, docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/db-ensure.test.ts` 4/4 pass (ensure x2 idempotent, TTL, valid insert ok, invalid + duplicate singleton rejected); config+smoke 8/8. Script without URI exits 1 (imports resolve under Node).
-- Open: zod and `$jsonSchema` are maintained by hand side by side (no generator); keep in step. Script not run against a real Atlas/local mongod. mongodb-memory-server downloaded MongoDB 8.2.6 on first run (~77 MB, cached).
-
+- 0.4 Mongo client + ensure - done 2026-10-19: `getDb()` cached client, registry + `ensureCollections`, zod + `$jsonSchema` by hand, `db:ensure` script; memory-server tests.
 - 0.3 Env + config - done 2026-10-19: zod env in `src/server/config.ts` (`parseConfig`, `getConfig`, integration flags, `ConfigError` names keys only); vitest stubs `server-only`.
 - 0.2 RESEARCH Pin versions - done 2026-10-19: all deps pinned exact in ADR 001; mongodb 6.21 (adapter peer), react-email 6.11.3, TS 5.9/ESLint 9 held; Auth.js v5 beta risk noted.
 - 0.1 Scaffold - done 2026-10-19: Next 16.4.2 + React 19 scaffold, Vitest/Playwright configs, folder layout, `.env.example`; AGENTS.md not added; npm audit warnings unreviewed.
