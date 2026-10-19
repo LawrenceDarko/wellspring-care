@@ -1,8 +1,15 @@
 # Progress
 
-Current task: 0.9 GATE + plan Phase 2 detail check
+Current task: 1.1 Design tokens + fonts
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 0.9 GATE + Phase 2 detail check - done 2026-10-19
+- Results: `npm run typecheck` pass; `npx eslint src test scripts` clean; `npx vitest run` 10 files, 55/55 pass (5.2s); `next build` pass (Next 16.4.2 Turbopack): / static, /sign-in partial prerender, /api/auth dynamic, /dev/outbox prerendered as notFound in production (guard checked).
+- Playwright not run: `test/e2e/` has no specs yet; first smoke is in 1.9.
+- No fixes needed. Follow-ups put into PLAN.md: sign-in honeypot/formToken -> 1.8; assignments in AuthContext, staff 12h re-auth, server-action rate-limit test -> Phase 2 outline; CSP headers, FIELD_ENC_OLD_KEYS, npm audit review -> Phase 8 outline.
+- Phase 2 outline still fits Phase 0 (scoped repos, field crypto, audit, rate limit, email outbox all in place). Detailed Phase 2 tasks still written in 1.9.
+- Files: docs/PLAN.md, docs/progress.md.
 
 ## 0.8 Rate limit + public-form guard - done 2026-10-19
 - Done: `src/server/data/rate-limits.ts` `incrementRateLimit` (upsert `$inc` on key+windowStart, retries once on E11000 race). `src/server/rate-limit.ts` (server-only): `checkRateLimit(scope, id, rule, deps)` fixed window, increment-then-check, `expiresAt` = window end (TTL index); `rateLimitKey` = HMAC-SHA256(AUTH_SECRET) of scope+lowercased id, so no raw IP/email stored; `RATE_LIMITS` (signInEmail 5/15m, signInIp 20/15m, publicForm 10/h), `rateLimit(scope, id)`, `clientIp(headers)`.
@@ -32,14 +39,7 @@ Current task: 0.9 GATE + plan Phase 2 detail check
 - Tests: typecheck pass; eslint clean; `npx vitest run test/email.test.ts test/db-ensure.test.ts` 10/10 pass (selection x3 incl. production refusal, outbox write + TTL index, newest first, app + DB validators reject bad template/recipient).
 - Open: Resend transport not exercised against the real API (no key). No React Email templates yet; callers pass text/html. Outbox bodies hold sign-in links in dev: only /dev/outbox (0.7c) may read them.
 
-## 0.6 Field encryption + audit + logger - done 2026-10-19
-- Done: `src/server/crypto/field.ts` (server-only): AES-256-GCM, 12-byte random IV, 16-byte tag, stored `{v:1,kid,iv,tag,ct}`. `createKeyring(currentKid, {kid: b64})` (multi-key for rotation), `getKeyring()` from FIELD_ENC_KEY/KID, `encryptField(pt, aad?, ring?)`, `decryptField(f, aad?, ring?)`, `needsRotation`. Optional `aad` binds ciphertext to record (e.g. `pastoral_notes.body:<id>`). `FieldCryptoError` messages never carry data.
-- `src/server/log.ts`: `log`, `createLogger(sink)`, `LOG_FIELDS` allowlist, primitives only, route query stripped, strings capped 200, `dropped` count; `errorFields(err)` = name only.
-- `src/server/audit.ts`: `recordAudit(ctx|null, {action, targetType?, targetId?, meta?}, db?)`, `AUDIT_ACTIONS` (PRD §13.6 list), `AUDIT_META_FIELDS` allowlist. Writes via `src/server/data/audit-logs.ts` `insertAuditLog` (append-only, zod-validated).
-- Files: src/server/{crypto/field,log,audit}.ts, src/server/data/audit-logs.ts, test/crypto/field.test.ts, test/log-audit.test.ts, docs. Removed `src/server/{audit,crypto}/.gitkeep` (audit is a file, not a dir).
-- Tests: typecheck pass; eslint clean; `npx vitest run test/crypto test/log-audit.test.ts` 14/14 pass (round trip, fresh IV, tamper ct/tag/iv, unknown kid, wrong key, aad mismatch, rotation, stored doc no plaintext, logger drops non-allowlisted/objects/errors, audit meta allowlist, null system actor, unknown action rejected).
-- Open: only one key from env today; retired keys for rotation need a config key (e.g. FIELD_ENC_OLD_KEYS) when rotation is first needed. Log/audit allowlists are my choice; extend per task. No audit read path yet (PRD §12.3, needs `audit:read`).
-
+- 0.6 Field encryption + audit + logger - done 2026-10-19: AES-256-GCM `encryptField`/`decryptField` with kid + aad, allowlisted logger, `recordAudit` with meta allowlist.
 - 0.5 Authz core - done 2026-10-19: capability map, `AuthContext`, `requireUser`/`requireCapability`, `scopedCollection` + scopes; IDOR tests.
 - 0.4 Mongo client + ensure - done 2026-10-19: `getDb()` cached client, registry + `ensureCollections`, zod + `$jsonSchema` by hand, `db:ensure` script; memory-server tests.
 - 0.3 Env + config - done 2026-10-19: zod env in `src/server/config.ts` (`parseConfig`, `getConfig`, integration flags, `ConfigError` names keys only); vitest stubs `server-only`.

@@ -61,7 +61,7 @@ Markers: `RESEARCH` = web lookups allowed (cap 5). `GATE` = full suite, `next bu
 - **1.7 Legal + scope pages** - PRD §1.3, §15.3. Privacy, terms, cancellation, refund, accessibility, service scope as MDX drafts with a top banner "Draft - requires legal review".
   Accept: pages render; copy checklist grep script (`scripts/copy-check.ts`) flags banned phrases; passes on all content.
 
-- **1.8 Contact + general inquiry** - PRD §4.1, §13.5, §14. Form (RHF + zod), server action with guard + rate limit, stores `contact_messages`, generic confirmation email to outbox.
+- **1.8 Contact + general inquiry** - PRD §4.1, §13.5, §14. Form (RHF + zod), server action with guard + rate limit, stores `contact_messages`, generic confirmation email to outbox. Also add honeypot + `formToken` to the sign-in form (0.8 follow-up).
   Accept: action tests (valid, honeypot, rate limit); stored doc has no extra fields.
 
 - **1.9 GATE + write Phase 2 tasks** - Full suite, `next build`, Playwright smoke (home -> services -> detail -> contact submit) at 360 and 1280 px. Then write Phase 2 tasks into this file.
@@ -69,11 +69,11 @@ Markers: `RESEARCH` = web lookups allowed (cap 5). `GATE` = full suite, `next bu
 
 ## Later phases (outline; detailed at the end of the previous phase)
 
-- **Phase 2 - Intake engine** (PRD §5, §10 prayer form, §11 requests): forms-as-data renderer, service request create (anon + claim), status machine, staff inbox, assignment, referral, prayer requests (encrypted), consent records, client request views. GATE incl. IDOR suite.
+- **Phase 2 - Intake engine** (PRD §5, §10 prayer form, §11 requests): forms-as-data renderer, service request create (anon + claim), status machine, staff inbox, assignment, referral, prayer requests (encrypted), consent records, client request views; fill `AuthContext.assignments` from the assignments collection; staff 12h re-auth (PRD §13.2) before staff inbox; first test of a server action calling `rateLimit`. GATE incl. IDOR suite.
 - **Phase 3 - Renewal program** (PRD §6): programs/tracks/cohorts/lessons, curriculum seed from `docs/content/renewal-curriculum.md`, enrollment wizard (payment stubbed to pending), participant portal, reflections, facilitator portal, attendance, certificate PDF.
 - **Phase 4 - Scheduling** (PRD §7): availability, slot engine with DST tests, booking, cancellation policy, reminders cron, check-ins from enrollments.
 - **Phase 5 - Payments** (PRD §8): Stripe Checkout, webhook + idempotency, quotes, invoices, deposits, installments, scholarships, memberships, dev mode. MVP milestone: acceptance criteria 1-5 and 8-11 demonstrable.
 - **Phase 6 - Bookings** (PRD §9): shared pipeline, weddings, officiants, license checklist data, funerals, events, venues, agreements.
 - **Phase 7 - Resources and prayer ministry** (PRD §10, §14): resources CMS, devotional plans, notification preferences, in-app notifications.
-- **Phase 8 - Admin and hardening** (PRD §12, §13.7, §16, §15): metrics, audit viewer, exports/deletion, retention cron, a11y pass, CSP review.
+- **Phase 8 - Admin and hardening** (PRD §12, §13.7, §16, §15): metrics, audit viewer, exports/deletion, retention cron, a11y pass, CSP headers (PRD §13.5, not yet built) + review, `FIELD_ENC_OLD_KEYS` for key rotation, `npm audit` review.
 - **Phase 9 - Launch** (brief §21-22): e2e for all 15 acceptance criteria, README, deployment guide (Vercel + Atlas), Stripe and Resend setup docs, security checklist, launch checklist, known-risks list.
