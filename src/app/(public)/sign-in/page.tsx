@@ -10,6 +10,7 @@ export const metadata: Metadata = { title: "Sign in - Wellspring Care" };
 const ERROR_MESSAGES: Record<string, string> = {
   InvalidEmail: "Please enter a valid email address.",
   Verification: "That sign-in link has expired or was already used. Request a new one below.",
+  RateLimited: "Too many sign-in requests. Please wait a few minutes and try again.",
 };
 const DEFAULT_ERROR = "We could not sign you in. Please try again.";
 

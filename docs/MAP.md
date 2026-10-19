@@ -35,6 +35,7 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `src/server/data/audit-logs.ts` - append-only `insertAuditLog(db, entry)`; used only by audit.ts.
 - `src/server/data/email-outbox.ts` - dev outbox store: `insertOutboxEmail`, `listOutboxEmails` (system-level; only email transport + /dev/outbox).
 - `src/server/email/index.ts` - server-only. `sendEmail(msg)` (Resend if configured, else `email_outbox` outside prod, else `EmailNotConfiguredError`), `selectTransport`, `emailAvailable`, `EMAIL_TEMPLATES`, type `EmailMessage`.
+- `src/server/rate-limit.ts` - server-only PRD §13.5. `rateLimit(scope, id)`, `checkRateLimit`, `RATE_LIMITS`, `clientIp`, `guardPublicForm(form, {headers?})`, `publicFormToken()` (render as hidden `formToken`), `HONEYPOT_FIELD`. Store: `src/server/data/rate-limits.ts` `incrementRateLimit`.
 - `src/server/payments/` - empty (.gitkeep).
 - `src/domain/`, `src/components/`, `src/content/` - empty (.gitkeep).
 
@@ -49,6 +50,7 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `test/authz/` - capability map + scoped-collection IDOR tests (PRD §13.1 IDOR suite lives here).
 - `test/crypto/field.test.ts`, `test/log-audit.test.ts` - encryption (tamper/kid/aad/rotation/no plaintext), logger allowlist, audit writes.
 - `test/auth.test.ts` - Auth.js email sign-in end to end via handlers (token, outbox, session, roles).
+- `test/rate-limit.test.ts` - fixed window limit/reset/concurrency, honeypot, form token, Origin.
 - `test/email.test.ts` - transport selection, production refusal, outbox write/TTL/validators.
 - `test/helpers/mongo.ts` - `startMongo()` -> `{ uri, client, db, stop }` on MongoMemoryReplSet.
 - `test/helpers/server-only.ts` - empty stub; vitest aliases `server-only` to it.

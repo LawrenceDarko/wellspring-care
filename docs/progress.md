@@ -1,8 +1,16 @@
 # Progress
 
-Current task: 0.8 Rate limit + public-form guard
+Current task: 0.9 GATE + plan Phase 2 detail check
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 0.8 Rate limit + public-form guard - done 2026-10-19
+- Done: `src/server/data/rate-limits.ts` `incrementRateLimit` (upsert `$inc` on key+windowStart, retries once on E11000 race). `src/server/rate-limit.ts` (server-only): `checkRateLimit(scope, id, rule, deps)` fixed window, increment-then-check, `expiresAt` = window end (TTL index); `rateLimitKey` = HMAC-SHA256(AUTH_SECRET) of scope+lowercased id, so no raw IP/email stored; `RATE_LIMITS` (signInEmail 5/15m, signInIp 20/15m, publicForm 10/h), `rateLimit(scope, id)`, `clientIp(headers)`.
+- `guardPublicForm(form, opts)`: honeypot `website` must be empty; `formToken` = signed server render time (`publicFormToken()`), min fill 3s, max age 24h; Origin vs APP_URL only when `headers` passed (route handlers). Returns `{ok}` or `{ok:false, reason}` (loggable code).
+- Sign-in action now rate-limited by IP then email -> `?error=RateLimited` (generic message on page).
+- Files: src/server/{rate-limit,data/rate-limits}.ts, test/rate-limit.test.ts, src/app/(public)/sign-in/{actions.ts,page.tsx}, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/rate-limit.test.ts` 7/7 pass (limit, reset next window, per-id buckets, hashed key + TTL expiry, 5 concurrent first hits -> count 5 / 3 allowed, honeypot, too fast/expired/missing/forged token, Origin).
+- Open: sign-in form has no honeypot/token yet (needs page hidden fields; apply with first public form). Sign-in limit not exercised through the action (no test of the server action). `clientIp` trusts x-forwarded-for: fine behind Vercel/proxy, spoofable if exposed directly. CSP headers (PRD §13.5) not done: not in any task yet.
 
 ## 0.7c Sign-in + outbox pages - done 2026-10-19
 - Done: `/sign-in` (server component, Suspense): email form -> server action `requestMagicLink` (zod email, `signIn("email")`, callbackUrl limited to same-origin relative paths, Auth.js errors -> `?error=EmailSignin`, logged by `errorName` only). Generic messages per `?error=` code. Shows "Sign-in is not configured" when env is missing (ConfigError) or no email transport. `/sign-in/check-email` static page. `/dev/outbox`: `notFound()` in production, else `listOutboxEmails` newest first, links clickable, noindex.
@@ -32,14 +40,7 @@ Current task: 0.8 Rate limit + public-form guard
 - Tests: typecheck pass; eslint clean; `npx vitest run test/crypto test/log-audit.test.ts` 14/14 pass (round trip, fresh IV, tamper ct/tag/iv, unknown kid, wrong key, aad mismatch, rotation, stored doc no plaintext, logger drops non-allowlisted/objects/errors, audit meta allowlist, null system actor, unknown action rejected).
 - Open: only one key from env today; retired keys for rotation need a config key (e.g. FIELD_ENC_OLD_KEYS) when rotation is first needed. Log/audit allowlists are my choice; extend per task. No audit read path yet (PRD §12.3, needs `audit:read`).
 
-## 0.5 Authz core - done 2026-10-19
-- Done: `src/server/auth/capabilities.ts` (pure): `ROLES`, `CAPABILITIES`, `ROLE_CAPABILITIES` per PRD §2, `capabilitiesFor(roles)` union (unknown roles grant nothing). super_admin = all staff caps + break_glass, roles:grant, audit:read, settings:manage, content:manage. No reflection capability exists at all (owner scope only).
-- `src/server/auth/context.ts` (server-only): `AuthContext { userId: ObjectId, capabilities: Set, assignments: {cohort|care_request|prayer_request|booking: ObjectId[]} }`, `buildAuthContext`, `AuthError(401|403)`, `hasCapability`, `requireUser`, `requireCapability`.
-- `src/server/data/base.ts` (server-only): `scopedCollection(db, name, scope)` -> findOne/find (limit cap 500)/countDocuments/updateOne/deleteOne, each `$and`s scope with caller filter; empty scope throws `UnscopedQueryError`, null scope = deny. Scopes: `ownerScope`, `assignedScope(cap, kind, field)`, `capabilityScope`, `anyScope`.
-- Files: src/server/auth/{capabilities,context}.ts, src/server/data/base.ts, test/authz/{capabilities,base}.test.ts, docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/authz` 14/14 pass (role map, multi-role union, super_admin no reflection cap, 401/403, IDOR null, filter can't widen scope, out-of-scope writes no-op, unscoped refused, assigned needs cap+assignment).
-- Open: `requireUser` takes a ctx; session -> AuthContext loader (Auth.js + user_roles + assignments) comes with the auth task. No scoped insert helper yet (inserts must stamp owner in each repo). Extra super_admin caps (audit/settings/content/roles) are my naming, not in PRD table.
-
+- 0.5 Authz core - done 2026-10-19: capability map, `AuthContext`, `requireUser`/`requireCapability`, `scopedCollection` + scopes; IDOR tests.
 - 0.4 Mongo client + ensure - done 2026-10-19: `getDb()` cached client, registry + `ensureCollections`, zod + `$jsonSchema` by hand, `db:ensure` script; memory-server tests.
 - 0.3 Env + config - done 2026-10-19: zod env in `src/server/config.ts` (`parseConfig`, `getConfig`, integration flags, `ConfigError` names keys only); vitest stubs `server-only`.
 - 0.2 RESEARCH Pin versions - done 2026-10-19: all deps pinned exact in ADR 001; mongodb 6.21 (adapter peer), react-email 6.11.3, TS 5.9/ESLint 9 held; Auth.js v5 beta risk noted.
