@@ -1,8 +1,16 @@
 # Progress
 
-Current task: 1.10h Services + content treatments (then 1.10 GATE, then 2.1)
+Current task: 1.10 GATE (then 2.1)
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.10h Services + content treatments - done 2026-10-19
+- Done: `src/components/site/page-header.tsx` `PageHeader({media} | {season})`: full-width band (clamp 11rem/34svh/22rem, gold hairline) with a `MEDIA` photo via `next/image` (`fill`, `preload`, 100vw) or a decorative season vignette, oversized layer in `Parallax` (0.1). `ContentPage({media?})` header slot: about chapelCross, chaplaincy heldHands, weddings weddingHands, funerals candle, programs forestPath, prayer teaLights (legal pages none). Services directory riverDawn; service detail its season vignette (none if the category maps to no season).
+- Season sections' content in `Reveal` (section + anchor id stay outside). Margin notes `lg:sticky` below the header (content pages, service detail). Package cards lift + gold top border on hover/focus-within (`--ease-story`), `motion-reduce` off.
+- `test/helpers/match-media.ts` shared jsdom matchMedia stub (`motion.reduce` toggle); imported first by services, content-pages, media, legal-pages tests (content.tsx now pulls GSAP).
+- Files: src/components/site/{page-header,services,content}.tsx, src/app/(public)/{about,chaplaincy,weddings,funerals,programs,prayer}/page.tsx (one prop each), test/{services,content-pages,media,legal-pages}.test.tsx, test/helpers/match-media.ts, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/services.test.tsx test/content-pages.test.tsx test/media.test.tsx test/legal-pages.test.tsx test/home.test.tsx test/motion.test.tsx test/site-shell.test.tsx test/art.test.tsx` 98/98 (new: header photo/vignette + order, no header without media/season, sticky notes, card motion classes, reduced vs motion render identical text/links/alts while motion adds reveal opacity + parallax transform).
+- Open: not run in a browser: header drift edges, sticky offset vs hiding header, image LCP/`preload` on content pages, 360 px. Contact page has no header yet (stillLake reserved). Check all in 1.10 GATE.
 
 ## 1.10g RESEARCH Stock media - done 2026-10-19
 - Done: ADR 008. Nine Unsplash photos (Unsplash License, free tier only) in `public/media/*.webp`, 1600x1067 landscape crops from the Unsplash CDN, 2.9 MB total (largest 763 KB): river-dawn, wedding-hands, family-path (from behind), forest-path, held-hands, candle, tea-lights, chapel-cross, still-lake. No faces (contact-sheet review). No video (Unsplash has none, Pexels needs an API key).
@@ -33,13 +41,7 @@ Current task: 1.10h Services + content treatments (then 1.10 GATE, then 2.1)
 - Tests: typecheck pass; eslint clean; `npx vitest run test/art.test.tsx test/contrast.test.ts test/motion.test.tsx` 16/16 (art 5: tokens defined as hex, no hex/rgb/hsl in sources or markup, 6 aria-hidden layer svgs on one viewBox, parallax depths wired + foreground static, one vignette per season with unique resolvable gradient ids). `check:contrast` 28/28. Temporary `next dev` (:3210, own distDir, then killed and removed) + scratch Playwright: `/dev/ui` horizontal overflow 0 px at 360 and 1280; screenshots reviewed (fixed: trees cropped out at 360, heavy bank stripe in the illness vignette).
 - Open: parallax drift not watched while scrolling (screenshots are static); mobile hero is mostly sky (room for the tagline in 1.10f). Light-only palette, like the rest.
 
-## 1.10c Motion foundation - done 2026-10-19
-- Done: `src/components/motion/`: `gsap.ts` (registers ScrollTrigger + useGSAP once, `MOTION` tokens: `power3.out`, reveal 0.9s/24px/"top 85%"), `useReducedMotion` (useSyncExternalStore; server/hydration and missing matchMedia = reduced, so motion starts after hydration), `MotionProvider` (Lenis `autoRaf:false` on the GSAP ticker -> `ScrollTrigger.update`, none under reduced motion, stops while body has `data-scroll-locked` (Radix dialogs), `ScrollTrigger.refresh()` on pathname change), `Reveal` (gsap.from opacity+y, once; opacity only so links stay focusable), `Parallax` (`speed` = share of viewport height, scrubbed, `invalidateOnRefresh`). Barrel `index.ts`.
-- Mounted around the public layout. CSS: `--ease-story` (quart-out = power3.out), `--duration-menu|reveal` in :root, `menu-stagger` uses them, Lenis html rules. `/dev/ui` "Motion" block (parallax band + five reveals). Header scroll unchanged (Lenis moves native scroll).
-- Files: src/components/motion/{gsap.ts,use-reduced-motion.ts,motion-provider.tsx,reveal.tsx,parallax.tsx,index.ts}, src/app/(public)/layout.tsx, src/app/globals.css, src/app/dev/ui/page.tsx, src/components/site/header-scroll.tsx (comment), test/motion.test.tsx, docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/motion.test.tsx test/site-shell.test.tsx test/contrast.test.ts test/home.test.tsx` 28/28 (motion 6: SSR has no style/opacity/transform, missing matchMedia = reduced, reduced -> no inline styles + no Lenis, motion on -> reveal opacity 0 not visibility, Lenis started/stopped on scroll lock/destroyed). `check:contrast` 28/28.
-- Open: not run in a browser (no dev server in this task); `data-scroll-locked` attr name assumed from react-remove-scroll-bar, verify in 1.10 GATE (page must not scroll behind the mobile overlay). Lenis anchors off: hash jumps are native (scroll-padding-top applies). Reveals of elements already in view on load blink once (JS from-state after paint).
-
+- 1.10c Motion foundation - done 2026-10-19: `src/components/motion/` (gsap tokens, `useReducedMotion` server=reduced, `MotionProvider` Lenis on GSAP ticker, `Reveal`, `Parallax`), mounted on the public layout; 28/28.
 - 1.10b Header + nav redesign - done 2026-10-19: `NAV_GROUPS` + flat `MAIN_NAV`, shadcn navigation-menu, one-row sticky header from lg (`HeaderScroll` over-hero/hidden attrs), forest mobile Dialog overlay, footer Explore nav; 58/58.
 - 1.10a RESEARCH Motion + imagery direction - done 2026-10-19: ADR 007 wellspring story, GSAP + Lenis + one raw WebGL2 shader, stock rules, one-row grouped nav; gsap 3.15.0, @gsap/react 2.1.2, lenis 1.3.26 pinned; PLAN 1.10b-h + GATE.
 - 1.9 GATE + write Phase 2 tasks - done 2026-10-19: first Playwright smoke (home -> services -> detail -> contact at 360/1280, no horizontal scroll), hermetic `test/e2e/server.ts`, Phase 2 tasks 2.1-2.10 written; 134/134 vitest, build ok, e2e 2/2.

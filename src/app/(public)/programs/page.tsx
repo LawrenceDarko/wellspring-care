@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Programs", description: "The Spiritu
 
 export default function ProgramsPage() {
   return (
-    <ContentPage>
+    <ContentPage media="forestPath">
       <Programs />
     </ContentPage>
   );

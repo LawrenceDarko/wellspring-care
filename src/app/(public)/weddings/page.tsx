@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Weddings", description: "Christian w
 
 export default function WeddingsPage() {
   return (
-    <ContentPage>
+    <ContentPage media="weddingHands">
       <Weddings />
     </ContentPage>
   );

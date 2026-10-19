@@ -1,13 +1,35 @@
 // @vitest-environment jsdom
+import { motion } from "./helpers/match-media";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import { ContentPage, contentComponents, TodoOrg } from "@/components/site/content";
 import { useMDXComponents } from "@/mdx-components";
+import { MEDIA } from "@/content/media";
 
 afterEach(() => {
   cleanup();
   vi.unstubAllEnvs();
+  motion.reduce = true;
 });
+
+/** Everything a reader gets: text, link targets, image alt text, in DOM order. */
+function readerView(el: HTMLElement) {
+  const links = [...el.querySelectorAll("a")].map((a) => a.getAttribute("href"));
+  const alts = [...el.querySelectorAll("img")].map((i) => i.getAttribute("alt"));
+  return { text: el.textContent, links, alts };
+}
+
+/** Renders `ui` with reduced motion and with motion; returns both reader views and the motion container. */
+function renderBothWays(ui: React.ReactElement) {
+  motion.reduce = true;
+  const still = render(ui);
+  const reduced = readerView(still.container);
+  expect(still.container.querySelector("[style*='opacity']")).toBeNull();
+  cleanup();
+  motion.reduce = false;
+  const moving = render(ui);
+  return { reduced, animated: readerView(moving.container), container: moving.container };
+}
 
 describe("TodoOrg pending block", () => {
   it.each(["development", "test"])("renders the pending block in %s", (env) => {
@@ -80,11 +102,49 @@ describe("ContentPage book layout (ADR 006)", () => {
     expect(aside?.textContent).toBe("Side note");
     expect(aside?.className).toContain("lg:col-start-2");
     expect(aside?.className).toContain("border-gold");
-    expect(aside!.compareDocumentPosition(container.querySelector("article")!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(
+      aside!.compareDocumentPosition(container.querySelector("article")!) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it("uses no all-caps labels in the pending block (ADR 006 rule 2)", () => {
     const { container } = render(<TodoOrg>Pending.</TodoOrg>);
     expect(container.innerHTML).not.toMatch(/uppercase|tracking-wide/);
+  });
+});
+
+describe("ContentPage header and motion (ADR 007, 1.10h)", () => {
+  const page = (
+    <ContentPage media="candle" note={<p>Side note</p>}>
+      <h1>Funerals</h1>
+      <p>Lede.</p>
+    </ContentPage>
+  );
+
+  it("puts the registered photo in a header band before the page, and none without media", () => {
+    const { container } = render(page);
+    const header = container.querySelector("[data-page-header='media']")!;
+    expect(header.querySelector("img")?.getAttribute("alt")).toBe(MEDIA.candle.alt);
+    expect(
+      header.compareDocumentPosition(container.querySelector("article")!) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    cleanup();
+    const plain = render(
+      <ContentPage>
+        <h1>Title</h1>
+      </ContentPage>,
+    );
+    expect(plain.container.querySelector("[data-page-header]")).toBeNull();
+  });
+
+  it("keeps the margin note sticky on desktop", () => {
+    const { container } = render(page);
+    expect(container.querySelector("aside")?.className).toContain("lg:sticky");
+  });
+
+  it("renders the same content with and without reduced motion", () => {
+    const { reduced, animated, container } = renderBothWays(page);
+    expect(animated).toEqual(reduced);
+    expect(container.querySelector("[data-page-header] [style*='transform']")).toBeTruthy();
   });
 });

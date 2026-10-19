@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { MDXComponents } from "mdx/types";
 import { EmergencyNotice } from "@/components/site/site-footer";
-import { MEDIA_LIST, UNSPLASH_LICENSE_URL } from "@/content/media";
+import { PageHeader } from "@/components/site/page-header";
+import { MEDIA_LIST, UNSPLASH_LICENSE_URL, type MediaKey } from "@/content/media";
 
 // Long-form content pages (PRD §4.1, §4.2). Copy lives in src/content/*.mdx and is styled
 // through `contentComponents` (wired up in src/mdx-components.tsx).
@@ -41,8 +42,10 @@ function ContentLink({ href = "", children, ...rest }: React.ComponentProps<"a">
 }
 
 // Book page (ADR 006): prose at reading measure, sections broken by a gold hairline,
-// side notes in a narrow margin column on desktop (stacked above the text on mobile).
-const marginNote = "self-start border-l-2 border-gold pl-4 text-[0.9375rem] text-muted-foreground";
+// side notes in a narrow margin column on desktop (stacked above the text on mobile),
+// sticky beside the text on desktop so they stay in view while reading.
+const marginNote =
+  "self-start border-l-2 border-gold pl-4 text-[0.9375rem] text-muted-foreground lg:sticky lg:top-[calc(var(--header-h)+2rem)]";
 
 export const contentComponents: MDXComponents = {
   h1: (props) => <h1 className="text-h1 font-medium" {...props} />,
@@ -58,16 +61,28 @@ export const contentComponents: MDXComponents = {
 
 /**
  * Long-form page. The paragraph right after the h1 is the lede. `note` sits in the margin
- * column; it comes first in the DOM so it reads before the body on mobile.
+ * column; it comes first in the DOM so it reads before the body on mobile. `media` puts a
+ * registered photo in the header band above the page.
  */
-export function ContentPage({ note, children }: { note?: React.ReactNode; children: React.ReactNode }) {
+export function ContentPage({
+  note,
+  media,
+  children,
+}: {
+  note?: React.ReactNode;
+  media?: MediaKey;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 pt-12 pb-4 md:px-6 md:pt-16 lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-x-16">
-      {note ? <aside className={`${marginNote} lg:col-start-2 lg:row-start-1 lg:mt-20`}>{note}</aside> : null}
-      <article className="flex min-w-0 max-w-measure flex-col gap-5 lg:col-start-1 lg:row-start-1 [&>h1+p]:text-lede">
-        {children}
-      </article>
-    </div>
+    <>
+      {media ? <PageHeader media={media} /> : null}
+      <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 pt-12 pb-4 md:px-6 md:pt-16 lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-x-16">
+        {note ? <aside className={`${marginNote} lg:col-start-2 lg:row-start-1 lg:mt-20`}>{note}</aside> : null}
+        <article className="flex min-w-0 max-w-measure flex-col gap-5 lg:col-start-1 lg:row-start-1 [&>h1+p]:text-lede">
+          {children}
+        </article>
+      </div>
+    </>
   );
 }
 
@@ -108,7 +123,9 @@ export function PhotoCredits() {
             <a href={m.sourceUrl} className={linkClass}>
               {m.alt.replace(/\.$/, "")}
             </a>{" "}
-            <span className="text-muted-foreground">by {m.credit}, {m.licence}</span>
+            <span className="text-muted-foreground">
+              by {m.credit}, {m.licence}
+            </span>
           </li>
         ))}
       </ul>

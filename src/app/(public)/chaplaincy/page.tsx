@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Chaplaincy", description: "Chaplains
 
 export default function ChaplaincyPage() {
   return (
-    <ContentPage>
+    <ContentPage media="heldHands">
       <Chaplaincy />
     </ContentPage>
   );

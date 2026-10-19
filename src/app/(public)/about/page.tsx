@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "About", description: "Our mission, f
 
 export default function AboutPage() {
   return (
-    <ContentPage>
+    <ContentPage media="chapelCross">
       <About />
       <PhotoCredits />
     </ContentPage>

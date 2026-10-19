@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Prayer Requests", description: "Shar
 
 export default function PrayerPage() {
   return (
-    <ContentPage>
+    <ContentPage media="teaLights">
       <Prayer />
     </ContentPage>
   );

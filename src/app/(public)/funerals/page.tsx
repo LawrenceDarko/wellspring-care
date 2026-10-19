@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Funerals & Memorials", description: 
 
 export default function FuneralsPage() {
   return (
-    <ContentPage>
+    <ContentPage media="candle">
       <Funerals />
     </ContentPage>
   );

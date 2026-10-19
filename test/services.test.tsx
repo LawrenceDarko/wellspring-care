@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { motion } from "./helpers/match-media";
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import {
@@ -8,9 +9,32 @@ import {
   ServicesDirectory,
   slugParam,
 } from "@/components/site/services";
+import { MEDIA } from "@/content/media";
 import type { PublicPackage, PublicServiceDetail } from "@/server/data/catalog";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  motion.reduce = true;
+});
+
+/** Everything a reader gets: text, link targets, image alt text, in DOM order. */
+function readerView(el: HTMLElement) {
+  const links = [...el.querySelectorAll("a")].map((a) => a.getAttribute("href"));
+  const alts = [...el.querySelectorAll("img")].map((i) => i.getAttribute("alt"));
+  return { text: el.textContent, links, alts };
+}
+
+/** Renders `ui` with reduced motion and with motion; returns both reader views and the motion container. */
+function renderBothWays(ui: React.ReactElement) {
+  motion.reduce = true;
+  const still = render(ui);
+  const reduced = readerView(still.container);
+  expect(still.container.querySelector("[style*='opacity']")).toBeNull();
+  cleanup();
+  motion.reduce = false;
+  const moving = render(ui);
+  return { reduced, animated: readerView(moving.container), container: moving.container };
+}
 
 const categories = [
   { id: "c1", slug: "pastoral-care", name: "Pastoral Care", summary: "Care summary" },
@@ -62,15 +86,29 @@ describe("services directory", () => {
       />,
     );
     expect(screen.getByRole("heading", { level: 1, name: "Services" })).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Premarital preparation" }).getAttribute("href")).toBe("/services/premarital");
+    expect(screen.getByRole("link", { name: "Premarital preparation" }).getAttribute("href")).toBe(
+      "/services/premarital",
+    );
     expect(screen.getByText("From $320")).toBeTruthy();
     expect(screen.getByText("Pricing on request")).toBeTruthy();
     expect(screen.getByText(/not a medical, mental-health or emergency provider/)).toBeTruthy();
   });
 
   it("groups all services by life season in season order, with anchors and unmapped last", () => {
-    const grief = { ...service, id: "s3", slug: "grief", name: "Grief care", category: { slug: "grief-and-hard-times", name: "Grief" } };
-    const other = { ...service, id: "s4", slug: "misc", name: "Misc care", category: { slug: "unmapped", name: "Unmapped" } };
+    const grief = {
+      ...service,
+      id: "s3",
+      slug: "grief",
+      name: "Grief care",
+      category: { slug: "grief-and-hard-times", name: "Grief" },
+    };
+    const other = {
+      ...service,
+      id: "s4",
+      slug: "misc",
+      name: "Misc care",
+      category: { slug: "unmapped", name: "Unmapped" },
+    };
     expect(groupServicesBySeason([other, grief, service]).map((g) => g.key)).toEqual(["family", "loss", "other"]);
 
     const { container } = render(<ServicesDirectory categories={categories} services={[other, grief, service]} />);
@@ -144,5 +182,65 @@ describe("service detail", () => {
   it("formats cents without float drift", () => {
     expect(formatMoney({ cents: 7550, currency: "USD" })).toBe("$75.50");
     expect(formatMoney({ cents: 8000, currency: "USD" })).toBe("$80");
+  });
+});
+
+describe("services motion treatments (ADR 007, 1.10h)", () => {
+  const detail: PublicServiceDetail = { ...service, eligibility: "Engaged couples.", packages: [pkg] };
+
+  it("directory opens with the registered river photo above the h1", () => {
+    const { container } = render(<ServicesDirectory categories={categories} services={[service]} />);
+    const header = container.querySelector("[data-page-header='media']")!;
+    const img = header.querySelector("img")!;
+    expect(img.getAttribute("alt")).toBe(MEDIA.riverDawn.alt);
+    expect(
+      header.compareDocumentPosition(screen.getByRole("heading", { level: 1 })) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("detail opens with its season vignette (decorative); unmapped categories get no header", () => {
+    const { container } = render(<ServiceDetail service={detail} />);
+    const header = container.querySelector("[data-page-header='art']")!;
+    expect(header.getAttribute("aria-hidden")).toBe("true");
+    expect(header.querySelector("svg")).toBeTruthy();
+    cleanup();
+    const other = render(<ServiceDetail service={{ ...detail, category: { slug: "unmapped", name: "Other" } }} />);
+    expect(other.container.querySelector("[data-page-header]")).toBeNull();
+  });
+
+  it("keeps the margin note in view on desktop and lifts package cards on hover and focus, not under reduced motion", () => {
+    const { container } = render(<ServiceDetail service={detail} />);
+    expect(screen.getByRole("complementary", { name: "Who this is for" }).className).toContain("lg:sticky");
+    const card = container.querySelector("[data-package-card]")!;
+    for (const c of [
+      "hover:-translate-y-1",
+      "focus-within:-translate-y-1",
+      "motion-reduce:translate-none",
+      "motion-reduce:transition-none",
+    ]) {
+      expect(card.className).toContain(c);
+    }
+  });
+
+  it("directory: reduced motion renders the same content as motion", () => {
+    const ui = (
+      <ServicesDirectory
+        categories={categories}
+        services={[
+          service,
+          { ...service, id: "s2", slug: "x", name: "X", category: { slug: "pastoral-care", name: "Pastoral Care" } },
+        ]}
+      />
+    );
+    const { reduced, animated, container } = renderBothWays(ui);
+    expect(animated).toEqual(reduced);
+    // Motion only adds from-states: season sections reveal, the header photo drifts.
+    expect(container.querySelector("#season-family [style*='opacity']")).toBeTruthy();
+    expect(container.querySelector("[data-page-header] [style*='transform']")).toBeTruthy();
+  });
+
+  it("detail: reduced motion renders the same content as motion", () => {
+    const { reduced, animated } = renderBothWays(<ServiceDetail service={detail} />);
+    expect(animated).toEqual(reduced);
   });
 });

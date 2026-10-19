@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import "./helpers/match-media";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
