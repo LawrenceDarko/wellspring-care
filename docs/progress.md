@@ -1,8 +1,15 @@
 # Progress
 
-Current task: 1.7 Legal + scope pages
+Current task: 1.8 Contact + general inquiry
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.7 Legal + scope pages - done 2026-10-19
+- Done: six MDX drafts in `src/content/legal/` (privacy, terms, cancellation, refund, accessibility, service-scope) at `/legal/<slug>` (matches `LEGAL_NAV`). `LegalPage` wrapper (`src/components/site/content.tsx`) renders `DraftBanner` "Draft - requires legal review" in every environment above the body. Org/counsel facts (entity, governing law, notice windows, refund rules, confidentiality limits, state privacy rights) are `TodoOrg`. Service scope renders `EmergencyNotice`.
+- `scripts/copy-check.ts` (`npm run check:copy`): rules for therapy/psychotherapy, clinical/professional counseling, guarantee, cure, healing, promise, proven/miracle, HIPAA compliance claims, credential words (certified, accredited, endorsed by), inaccurate faith names. Allowed when a negation precedes it in the same sentence. Skips `TodoOrg` blocks and code comments. Requires `<EmergencyNotice` in prayer + service-scope. Scans `src/content`, `src/components/site`, `src/app/(public)` (.mdx/.tsx).
+- Files: src/components/site/content.tsx, src/content/legal/*.mdx (6), src/app/(public)/legal/*/page.tsx (6), scripts/copy-check.ts, test/legal-pages.test.tsx, package.json, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/legal-pages.test.tsx test/content-pages.test.tsx` 25/25 pass (banner before body, every LEGAL_NAV route + MDX exists, copy-check passes on all content, 8 banned phrases flagged, negation scoped to sentence, TodoOrg/comments skipped, emergency notice required). `npm run check:copy` -> ok.
+- Open: MDX pages not rendered (no dev server/build until 1.9 GATE). Retention periods quote PRD §13.7 defaults (ADR not written yet). Copy-check is a heuristic: a negation anywhere earlier in the sentence excuses a phrase. Contact page (1.8) is .tsx and is in scan scope; emergency notice on Contact is not enforced by the script.
 
 ## 1.6 Content pages - done 2026-10-19
 - Done: MDX via `@next/mdx` (`next.config.ts` `createMDX({})`, `src/mdx-components.tsx`). Six pages import `src/content/<page>.mdx` into `<ContentPage>`: /about, /chaplaincy, /weddings, /funerals, /programs, /prayer (static explainer, form in Phase 2, emergency notice). `src/components/site/content.tsx`: `TodoOrg` (pending block "Content pending - TODO(org)", optional section heading; returns null when NODE_ENV=production), `contentComponents` (styled headings/lists, internal links via next/link, `TodoOrg`, `EmergencyNotice`).
@@ -34,14 +41,7 @@ Current task: 1.7 Legal + scope pages
 - Tests: typecheck pass; eslint clean; `npx vitest run test/catalog.test.ts test/db-ensure.test.ts` 11/11 pass (seed idempotent + validators, all packages inactive, admin edits kept, dev flag activates, inactive packages/services/categories hidden, ordering + filter). `node scripts/db-seed.ts` without URI exits 1 with message (imports load).
 - Open: seed not run against a real DB (no local mongod). `intakeFormKey` values (general-care, hospice, family-couples) have no `intake_forms` yet (intake tasks). Service `bodyRef` copy not written. Prices are placeholders pending org review.
 
-## 1.2 Site shell - done 2026-10-19
-- Done: `src/server/data/settings.ts` `getSettings(db?)` (public read of `organization_settings` key "default", public-field projection, stored values merged over frozen `SETTINGS_DEFAULTS`). `(public)/layout.tsx`: skip link, header, `<main id="main" tabIndex=-1>`, footer; settings loaded via `"use cache"` + `cacheTag("organization-settings")`, falls back to defaults on `ConfigError` (cacheLife minutes). Header: name from settings, desktop nav (lg+), mobile Sheet nav. Footer: contact from settings or "not configured yet", emergency notice (tel:911, tel:988), legal links, pastoral-care-only line.
-- Public pages' `<main>` -> `<div>` (layout owns `<main>`).
-- New dev deps (user approved, ADR 001 row): @testing-library/react 16.3.3, dom 10.4.2, user-event 14.6.8, jsdom 30.1.3. Vitest now includes `*.test.tsx`.
-- Files: src/server/data/settings.ts, src/components/site/{nav.ts,site-header.tsx,mobile-nav.tsx,site-footer.tsx}, src/app/(public)/{layout,page}.tsx, sign-in pages, test/{settings.test.ts,site-shell.test.tsx}, vitest.config.ts, package.json, docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/settings.test.ts test/site-shell.test.tsx` 8/8 pass (defaults when missing, merge + no internal fields, skip link first Tab stop -> #main, nav, mobile sheet opens, footer 911/988/legal/contact); smoke + contrast 6/6.
-- Open: not rendered with dev server or `next build` ("use cache" + fallback unverified until 1.9 GATE). Nav/legal routes 404 until their tasks. Home h1 still hardcodes "Wellspring Care" (home task). Admin settings write must `revalidateTag("organization-settings")`.
-
+- 1.2 Site shell - done 2026-10-19: `getSettings` over defaults, public layout (skip link, header, mobile Sheet nav, footer with 911/988 + legal links), Testing Library + jsdom dev deps.
 - 1.1 Design tokens + fonts - done 2026-10-19: brand tokens + `@theme inline`, Fraunces/Source Sans 3 (ADR 002), shadcn init + 9 components, solid focus rings, `check:contrast` 25/25.
 - 0.9 GATE + Phase 2 detail check - done 2026-10-19: typecheck/eslint/55 tests/`next build` pass; Playwright deferred to 1.9; follow-ups added to PLAN.md.
 - 0.8 Rate limit + public-form guard - done 2026-10-19: fixed-window `checkRateLimit` (HMAC keys, TTL), `guardPublicForm` (honeypot, signed formToken, Origin); sign-in rate-limited. Sign-in honeypot/token and CSP still open.

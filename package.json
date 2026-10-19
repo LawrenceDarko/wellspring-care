@@ -13,7 +13,8 @@
     "test:e2e": "playwright test",
     "db:ensure": "node --env-file-if-exists=.env.local scripts/db-ensure.ts",
     "db:seed": "node --env-file-if-exists=.env.local scripts/db-seed.ts",
-    "check:contrast": "node scripts/check-contrast.ts"
+    "check:contrast": "node scripts/check-contrast.ts",
+    "check:copy": "node scripts/copy-check.ts"
   },
   "dependencies": {
     "@auth/mongodb-adapter": "3.11.3",

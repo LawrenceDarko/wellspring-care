@@ -17,7 +17,7 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `src/app/(public)/layout.tsx` - public shell: SkipLink, SiteHeader, `<main id="main">`, SiteFooter; settings via `"use cache"` tag `organization-settings` (defaults on ConfigError). Pages render `<div>`, not `<main>`.
 - `src/app/(public)/page.tsx` - home: `"use cache"` loader (settings, categories, events, testimonials; defaults on ConfigError) -> `HomeSections` (`src/components/site/home.tsx`, pure props, type `HomeData`).
 - `src/app/(public)/services/` - directory (`?category=<slug>` only) + `[slug]/page.tsx` detail; Suspense + `"use cache"` tag `catalog`. UI in `src/components/site/services.tsx` (`ServicesDirectory`, `ServiceDetail`, `slugParam`, `formatMoney`, `requestHref` -> `/request/<slug>`).
-- Content pages `src/app/(public)/{about,chaplaincy,weddings,funerals,programs,prayer}/page.tsx` render `src/content/<page>.mdx` in `ContentPage`. `src/components/site/content.tsx`: `TodoOrg` (pending block, hidden in production; `rg -n TodoOrg src/content`), `contentComponents` (used by `src/mdx-components.tsx`).
+- Content pages `src/app/(public)/{about,chaplaincy,weddings,funerals,programs,prayer}/page.tsx` render `src/content/<page>.mdx` in `ContentPage`. `src/components/site/content.tsx`: `TodoOrg` (pending block, hidden in production; `rg -n TodoOrg src/content`), `contentComponents` (used by `src/mdx-components.tsx`), `LegalPage` + `DraftBanner`. Legal drafts: `src/app/(public)/legal/<slug>/page.tsx` -> `src/content/legal/<slug>.mdx`.
 - `src/app/api/auth/[...nextauth]/route.ts` - Auth.js GET/POST handlers.
 - `src/app/(public)/sign-in/` - magic-link form (`page.tsx`, server action `requestMagicLink` in `actions.ts`), `check-email/page.tsx`. "Not configured" state on missing env.
 - `src/app/dev/outbox/page.tsx` - dev-only outbox viewer (404 in production). `src/app/dev/ui/page.tsx` - token + component preview (404 in production).
@@ -46,7 +46,7 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 ## scripts/
 - `scripts/db-ensure.ts` - applies registry via `ensureCollections`; needs only MONGODB_URI/MONGODB_DB (`.env.local` auto-loaded).
 - `scripts/db-seed.ts` - `npm run db:seed [-- --activate-packages]` (flag dev only). `scripts/seed/catalog.ts` - `CATALOG_SEED`, `seedCatalog(db, opts)` ($setOnInsert only, packages inactive).
-- `scripts/check-contrast.ts` - WCAG check of token pairs in globals.css (`PAIRS`, `checkContrast`, `contrastRatio`).
+- `scripts/copy-check.ts` - `npm run check:copy`, PRD §15.3 banned phrases (`RULES`, `checkCopy`, `checkAll`; negation in same sentence allowed, TodoOrg skipped). `scripts/check-contrast.ts` - WCAG check of token pairs in globals.css (`PAIRS`, `checkContrast`, `contrastRatio`).
 
 ## test/
 - `test/smoke.test.ts` - alias + metadata smoke. `test/config.test.ts` - config parsing, integration booleans, required-key errors. `test/db-ensure.test.ts` - ensure idempotency, TTL, validators.
@@ -56,5 +56,5 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `test/rate-limit.test.ts` - fixed window limit/reset/concurrency, honeypot, form token, Origin. `test/email.test.ts` - transport selection, production refusal, outbox write/TTL/validators.
 - `test/helpers/mongo.ts` - `startMongo()` -> `{ uri, client, db, stop }` on MongoMemoryReplSet. `test/helpers/server-only.ts`, `test/helpers/next-font.ts` - stubs vitest aliases `server-only` / `next/font/google` to.
 - `test/contrast.test.ts` - token contrast pairs, light only, solid focus ring in ui components.
-- `test/catalog.test.ts` (seed idempotent, inactive hidden), `test/content.test.ts` (events, testimonial consent), `test/home.test.tsx` (CTAs, empty sections hidden), `test/services.test.tsx` (directory/detail render, slug param), `test/settings.test.ts`, `test/content-pages.test.tsx` (TodoOrg dev/prod, MDX map), `test/site-shell.test.tsx` - settings defaults/merge; shell keyboard + footer (jsdom + Testing Library, `// @vitest-environment jsdom`).
+- `test/catalog.test.ts` (seed idempotent, inactive hidden), `test/content.test.ts` (events, testimonial consent), `test/home.test.tsx` (CTAs, empty sections hidden), `test/services.test.tsx` (directory/detail render, slug param), `test/settings.test.ts`, `test/content-pages.test.tsx` (TodoOrg dev/prod, MDX map), `test/legal-pages.test.tsx` (draft banner, routes, copy-check), `test/site-shell.test.tsx` - settings defaults/merge; shell keyboard + footer (jsdom + Testing Library, `// @vitest-environment jsdom`).
 - `test/e2e/` - Playwright specs (empty).

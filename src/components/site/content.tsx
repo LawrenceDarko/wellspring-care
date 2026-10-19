@@ -54,3 +54,25 @@ export const contentComponents: MDXComponents = {
 export function ContentPage({ children }: { children: React.ReactNode }) {
   return <article className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-14">{children}</article>;
 }
+
+export const DRAFT_BANNER_TEXT = "Draft - requires legal review";
+
+/** Shown on every legal page in every environment until counsel signs off (PLAN 1.7). */
+export function DraftBanner() {
+  return (
+    <aside role="note" aria-label="Draft notice" className="rounded-lg border-2 border-gold bg-accent p-4 text-accent-foreground">
+      <p className="font-semibold">{DRAFT_BANNER_TEXT}</p>
+      <p className="text-sm">This page is a working draft and is not yet final. Contact us with any questions.</p>
+    </aside>
+  );
+}
+
+/** Legal and scope pages (PRD §4.1): draft banner above the MDX body. */
+export function LegalPage({ children }: { children: React.ReactNode }) {
+  return (
+    <ContentPage>
+      <DraftBanner />
+      {children}
+    </ContentPage>
+  );
+}
