@@ -82,6 +82,35 @@ Markers: `RESEARCH` = web lookups allowed (cap 5). `GATE` = full suite, `next bu
 - **1.9 GATE + write Phase 2 tasks** - Full suite, `next build`, Playwright smoke (home -> services -> detail -> contact submit) at 360 and 1280 px, on the ADR 006 UI. Then write Phase 2 tasks into this file.
   Accept: results recorded; Phase 2 tasks present.
 
+## Phase 1.10 - Story-driven public redesign (user request 2026-10-19, ADR 007)
+
+- **1.10a RESEARCH Motion + imagery direction** - ADR 007 (story, GSAP + Lenis, hero shader, vectors + stock, nav), pin gsap/@gsap/react/lenis in ADR 001, install, plan 1.10b-i.
+  Accept: `npm ls` clean; typecheck.
+
+- **1.10b Motion foundation** - ADR 007 rules 1-4. `src/components/motion/`: `MotionProvider` (client; registers ScrollTrigger, Lenis on GSAP ticker, off under reduced motion, refresh on route change), `Reveal` (fade/rise on enter, JS sets the from-state), `Parallax` (speed prop, scrub), `useReducedMotion`. Easing/duration tokens in `globals.css`. Mount in `(public)/layout.tsx`. `/dev/ui` demo block.
+  Accept: jsdom tests: content visible with no JS / under reduced motion (no transform/opacity style set); provider skips Lenis under reduced motion.
+
+- **1.10c Header + nav redesign** - ADR 007 Nav. `nav.ts` grouped (`NAV_GROUPS`, flat `MAIN_NAV` kept for footer/sitemap), `npx shadcn add navigation-menu`, single-row sticky header (transparent over hero via `data-over-hero`, solid after scroll, hide-on-scroll-down), "Request care" button, full-screen forest mobile overlay with staggered links (instant under reduced motion). Files: `nav.ts`, `site-header.tsx`, `mobile-nav.tsx`, new `header-scroll.tsx`, test.
+  Accept: site-shell tests updated (skip link first focusable, every route reachable from both menus, Escape closes, focus returns to trigger, 44px targets).
+
+- **1.10d Vector art set** - ADR 007 Vectors. `src/components/art/landscape.tsx` (layer components: sky, far hills, near hills, spring/water, trees, birds; each a separate `<svg>` layer for parallax), `seasons-art.tsx` (five season vignettes). Token colors, `aria-hidden`, viewBox-responsive. `/dev/ui` specimen.
+  Accept: render test (aria-hidden, no hard-coded hex outside tokens); 360/1280 no overflow on `/dev/ui`.
+
+- **1.10e Hero shader** - ADR 007 WebGL. `src/components/art/wellspring-shader.tsx`: raw WebGL2 full-screen quad (water + light, palette uniforms), guards (WebGL2, reduced motion, saveData, >=768px), DPR cap 1.5, IntersectionObserver + visibilitychange pause, context-loss handling, cleanup. Pure guard fn `canRunShader(env)` in `src/domain/` for tests.
+  Accept: guard unit tests; component renders the SVG fallback when guard is false; no console errors on `/dev/ui` (dev server, killed after).
+
+- **1.10f Home story** - PRD §4.3, ADR 007 Story. Rebuild `home.tsx`: pinned hero (shader + parallax landscape, tagline, CTAs), scrubbed "downstream" chapter: five seasons each a scene (vignette swap, season copy, link), then remaining PRD §4.3 sections with reveals, closing "still pool" CTA. Server data unchanged.
+  Accept: home tests updated (CTAs, five season links in order as an `<ol>`, empty sections hidden, all text present without JS).
+
+- **1.10g RESEARCH Stock media** - ADR 007 Stock. Choose <= 10 Unsplash/Pexels images (+ <= 1 short loop video, <= 4 MB) for home chapters, services, content headers; download to `public/media/` (resized webp/avif), `src/content/media.ts` (src, alt, credit, sourceUrl, licence, width, height). Credits listed on `/about` or a credits section of the footer.
+  Accept: media test (every entry has alt + credit + licence; files exist); no face beside a quote.
+
+- **1.10h Services + content treatments** - ADR 007. Image/vector page headers with parallax, season sections reveal, sticky margin notes on desktop, package cards hover/focus motion; `ContentPage` header image slot. Files: `services.tsx`, `content.tsx`, page header component, tests.
+  Accept: services/content-pages tests pass; reduced-motion render identical content.
+
+- **1.10 GATE** - Full suite, `next build`, Playwright at 360/1280 (existing smoke + header menus by keyboard + a `reducedMotion: 'reduce'` run asserting all home text visible), no horizontal scroll, first-load JS for `/` recorded.
+  Accept: results recorded; Phase 2 resumes at 2.1.
+
 ## Phase 2 - Intake engine
 
 - **2.1 Intake data layer** - PRD §3.2 (Intake), §5.1, §13.1. Zod schemas + validators for `intake_forms` (key, version, fields; `sensitive` literal false, free text maxLength <= 500), `service_requests` (requester userId or `pendingClaim`, service, package?, answers, status, assignedProviderIds, history[]), `referrals`, `consent_records`; registry indexes. Files: `src/server/data/schemas/intake.ts`, `registry.ts`, test.

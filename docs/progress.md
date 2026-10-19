@@ -1,8 +1,16 @@
 # Progress
 
-Current task: 2.1 Intake data layer
+Current task: 1.10b Motion foundation (then 1.10c-i, GATE, then 2.1)
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.10a RESEARCH Motion + imagery direction - done 2026-10-19
+- Done: user found the UI flat and the header broken (wordmark row + second row of ten links) and asked for a scroll-story redesign. User chose GSAP + Lenis, original vectors + licensed stock, one hero shader. ADR 007: "wellspring" story (spring -> five seasons downstream -> still pool CTA), progressive enhancement + reduced-motion = static, raw WebGL2 shader with guards, stock rules (no faces beside quotes), one-row grouped nav with "Request care". Supersedes ADR 006 rules 1 and 5 on public pages.
+- Installed exact: gsap 3.15.0, @gsap/react 2.1.2, lenis 1.3.26 (ADR 001 row). No OGL/three.js.
+- PLAN.md: Phase 1.10 tasks 1.10b-h + GATE inserted before Phase 2.
+- Files: package.json, package-lock.json, docs/adr/{001,006,007,README}, docs/{PLAN,progress,MAP}.md.
+- Tests: `npm ls gsap @gsap/react lenis` clean; `npm run typecheck` pass. No code changed, no vitest run.
+- Open: nav grouping and "Request care" -> /services need user/org confirmation. Stock picks are sourced in 1.10g (RESEARCH). Install still blocks esbuild/fsevents/unrs-resolver/mongodb-memory-server scripts (as before).
 
 ## 1.9 GATE + write Phase 2 tasks - done 2026-10-19
 - Done: GATE on the ADR 006 UI. First Playwright spec `test/e2e/smoke.spec.ts`: home -> "Request spiritual care" -> /services -> first service detail -> /contact submit (waits 3.5s for the form guard), at 360 and 1280 px, asserting no horizontal scroll on each page.
@@ -35,12 +43,7 @@ Current task: 2.1 Intake data layer
 - Tests: typecheck pass; eslint clean; `npx vitest run test/home.test.tsx test/seasons.test.ts test/site-shell.test.tsx` 15/15 pass; `check:copy` ok. Rendered on user's dev server (:3000) in Chrome at 360/768/1280: scrollWidth == viewport, no element past the edge.
 - Open: rendered without DB (no categories under seasons, events/testimonials hidden). `/services#season-*` anchors land in 1.9d. CTA labels now sentence case (PRD §4.3 quotes title case). Tagline title case comes from settings data.
 
-## 1.9b Shell restyle - done 2026-10-19
-- Done: header wordmark in Fraunces (`text-h3`, SOFT 50), quiet desktop nav (muted, gold hover underline, 44px targets) now from `xl` (10 links don't fit at 1024); below `xl` a ghost "Menu" button opens a linen sheet (site name title, 44px rows, pale-moss hover). Footer is a forest `band`: name + tagline + pastoral-only line, gold hairlines, three sections (Contact + "Send us a message" link, "If it is urgent" with EmergencyNotice, Policies legal nav), copyright. `<main>` gets bottom padding so pages don't butt the band.
-- Files: src/components/site/{site-header,mobile-nav,site-footer}.tsx, src/app/(public)/layout.tsx, test/site-shell.test.tsx, docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/site-shell.test.tsx test/contrast.test.ts test/home.test.tsx test/content-pages.test.tsx` 21/21 pass (skip link first focusable; new: footer has `band` + every footer link has `focus-visible:outline-2 outline-ring`; nav/menu 44px). `check:contrast` 28/28; `check:copy` ok.
-- Open: not rendered (class-level checks only; real focus visibility + 360/1280 layout in 1.9 GATE Playwright). No `aria-current` on nav (header is a server component). Sign-in link not in header yet.
-
+- 1.9b Shell restyle - done 2026-10-19: Fraunces wordmark header, nav from `xl`, linen Sheet menu below `xl`, forest band footer (contact, emergency, legal); 44px targets, focus on band.
 - 1.9a Design direction - done 2026-10-19: ADR 006 (life-seasons path, refined palette, book-page layout, 8 UI rules), linen/charcoal/moss tokens + `band*`, type scale + `max-w-measure`, PLAN tasks 1.9b-e.
 - 1.8 Contact + general inquiry - done 2026-10-19: `/contact` RHF form -> `submitContactForm` (guard, validate, IP+email rate limit, `contact_messages`, generic receipt email); `FormGuardFields` on sign-in. Contact submit must wait >3s.
 - 1.7 Legal + scope pages - done 2026-10-19: six legal MDX drafts at `/legal/<slug>` in `LegalPage` + `DraftBanner`, org facts as `TodoOrg`, `npm run check:copy` (PRD §15.3 banned phrases, emergency notice required).

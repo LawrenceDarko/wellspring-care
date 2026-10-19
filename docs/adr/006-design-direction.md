@@ -24,4 +24,5 @@ PRD §4.4 fixes the palette family (ivory, forest, restrained gold, charcoal), s
 ## Verification
 `npm run check:contrast` 28/28 pairs incl. band pairs. `/dev/ui` shows scale and band.
 ## Consequences
+Rules 1 and 5 superseded for public pages by ADR 007 (2026-10-19): scroll storytelling, parallax, hero shader. Palette, type and copy rules stand.
 Tasks 1.9b-e restyle existing pages to these rules before the 1.9 GATE. Future UI tasks cite this ADR. Token values changed, so screenshots from before 1.9a are stale.
