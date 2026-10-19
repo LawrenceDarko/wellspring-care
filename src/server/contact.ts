@@ -18,9 +18,9 @@ export type ContactState =
   | { status: "error"; message: string };
 
 export const CONTACT_MESSAGES = {
-  expired: "This form has expired. Please reload the page and try again.",
-  rateLimited: "Too many messages from this connection. Please try again later.",
-  failed: "We could not send your message. Please try again later.",
+  expired: "This form expired or was sent too quickly. Please reload the page and send it again.",
+  rateLimited: "We have received several messages from you in the last hour. Please try again in an hour.",
+  failed: "We could not send your message just now. Please try again in a few minutes.",
 } as const;
 
 // Generic by design (PRD §14): never echoes the message or name.

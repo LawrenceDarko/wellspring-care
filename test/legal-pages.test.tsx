@@ -22,6 +22,7 @@ describe("legal pages", () => {
     expect(banner.textContent).toContain(DRAFT_BANNER_TEXT);
     expect(DRAFT_BANNER_TEXT).toBe("Draft - requires legal review");
     expect(banner.compareDocumentPosition(screen.getByRole("heading", { level: 1 })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(banner.closest("aside")?.className).toContain("lg:col-start-2");
   });
 
   it.each(LEGAL_NAV.map((l) => l.href))("%s has a route using LegalPage and an MDX draft", (href) => {

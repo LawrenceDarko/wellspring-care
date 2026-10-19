@@ -1,8 +1,16 @@
 # Progress
 
-Current task: 1.9e Content, legal, contact, sign-in restyle (then 1.9 GATE)
+Current task: 1.9 GATE + write Phase 2 tasks
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.9e Content, legal, contact, sign-in restyle - done 2026-10-19
+- Done: `ContentPage` is a book page (max-w-6xl grid, article at `max-w-measure`, first `p` after h1 is `text-lede`, optional `note` in a 15rem margin column, first in DOM so it reads first on mobile). `contentComponents`: h1/h2/h3 on the type scale, h2 opens with a gold hairline, gold list markers. `TodoOrg` no all-caps. `LegalPage` puts `DraftBanner` (same text + role/label) in the margin note.
+- Contact: book-page header (h1, lede) + EmergencyNotice in the margin, form below a hairline; alerts as destructive left-rule, sent/not-configured states on pale moss. `CONTACT_MESSAGES` now say what happened and what to do (expired also covers "sent too quickly").
+- Sign-in: shadcn Input/Label/Button (old black button gone), error alert linked via `aria-describedby`, `EmailSignin` message added, clearer InvalidEmail/FormExpired copy. Check-email restyled.
+- Files: src/components/site/content.tsx, src/app/(public)/contact/{page,contact-form}.tsx, src/app/(public)/sign-in/{page,check-email/page}.tsx, src/server/contact.ts, test/{content-pages,legal-pages}.test.tsx, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/content-pages.test.tsx test/legal-pages.test.tsx test/form-guard.test.tsx test/contact.test.ts test/site-shell.test.tsx test/contrast.test.ts` 48/48 pass (new: measure/lede/hairline, margin note order, no all-caps, draft notice in margin). `check:copy` ok.
+- Open: not rendered in a browser (360/1280 in 1.9 GATE). Content pages pass no `note` yet. Sign-in page not unit tested (async server component).
 
 ## 1.9d Services restyle - done 2026-10-19
 - Done: directory per ADR 006: book-page header (h1, lede, scope note in margin column), quiet category filter (rounded-md, pale-moss selected, same `?category=` hrefs + `aria-current`). "All" view grouped by life season (`groupServicesBySeason` in services.tsx: season order, unmapped -> "Other care" last, empty seasons dropped), each a `<section id="season-<key>">` with gold numbered marker (aria-hidden, number = position in SEASONS) + season line; services as rows (name, summary, category, price), no cards. Filtered view: category h2 + summary + rows.
@@ -32,14 +40,7 @@ Current task: 1.9e Content, legal, contact, sign-in restyle (then 1.9 GATE)
 - Tests: typecheck pass; eslint clean; `check:contrast` 28/28; `npx vitest run test/contrast.test.ts test/site-shell.test.tsx test/home.test.tsx` 14/14 pass.
 - Open: CLAUDE.md is read-only on disk, so the "UI design" rule is in MAP.md, not CLAUDE.md (user to add). Not rendered in dev server (new tokens shift all pages slightly; checked in 1.9 GATE). Existing pages still use old card-grid layouts until 1.9b-e.
 
-## 1.8 Contact + general inquiry - done 2026-10-19
-- Done: `/contact` page (EmergencyNotice, link to /services for care requests) with RHF + zod client form (`contact-form.tsx`, `useActionState`, posts without JS too) -> server action `sendContactMessage` -> `submitContactForm` (`src/server/contact.ts`): guard (honeypot looks like success, stores nothing; bad/too-fast/expired token -> "form expired") -> validate (`contactInputSchema` in `src/domain/contact.ts`) -> rate limit per IP and per email (`publicForm` rule, scopes contactIp/contactEmail) -> `insertContactMessage` -> generic "inquiry_received" email (no name/message); missing/failing email transport only skips the receipt.
-- New collection `contact_messages` (name, email, message, status new/closed, closedAt?, timestamps; strict zod + `additionalProperties: false`). Token minted per request (`connection()`); missing AUTH_SECRET -> "not configured".
-- Sign-in follow-up: `FormGuardFields` (`src/components/site/form-guard.tsx`, honeypot + `formToken`) on the sign-in form; `requestMagicLink` guards first (honeypot -> check-email, else `?error=FormExpired`).
-- Files: src/domain/contact.ts, src/server/data/{schemas/contact.ts,contact-messages.ts,registry.ts}, src/server/contact.ts, src/components/site/form-guard.tsx, src/app/(public)/contact/{page.tsx,contact-form.tsx,actions.ts}, src/app/(public)/sign-in/{page.tsx,actions.ts}, test/{contact.test.ts,form-guard.test.tsx}, docs. (~11 files, over the ~6 guideline; small each.)
-- Tests: typecheck pass; eslint clean; `npx vitest run test/contact.test.ts test/form-guard.test.tsx test/rate-limit.test.ts test/db-ensure.test.ts test/auth.test.ts` 21/21 pass (valid stores exactly allowlisted keys + generic email, outbox write, no-email still stores, honeypot, forged/fast/missing token, field errors, IP + email limits, hashed keys). `check:copy` ok.
-- Open: ContactForm client + sign-in action guard not exercised in tests (no render of server-action modules); verify in 1.9 Playwright (contact submit must wait >3s MIN_FILL_MS). Sign-in submitted within 3s shows "form expired". No staff read of contact_messages yet; retention purge not built.
-
+- 1.8 Contact + general inquiry - done 2026-10-19: `/contact` RHF form -> `submitContactForm` (guard, validate, IP+email rate limit, `contact_messages`, generic receipt email); `FormGuardFields` on sign-in. Contact submit must wait >3s.
 - 1.7 Legal + scope pages - done 2026-10-19: six legal MDX drafts at `/legal/<slug>` in `LegalPage` + `DraftBanner`, org facts as `TodoOrg`, `npm run check:copy` (PRD §15.3 banned phrases, emergency notice required).
 - 1.6 Content pages - done 2026-10-19: MDX via `@next/mdx`, six pages in `ContentPage`, `TodoOrg` pending blocks (hidden in production), `contentComponents`.
 - 1.5 Services directory + detail - done 2026-10-19: `/services` (category chips, `?category=`) + `/services/[slug]` with packages, `startingPrice`, `slugParam`; request href `/request/<slug>` (404 until Phase 2).

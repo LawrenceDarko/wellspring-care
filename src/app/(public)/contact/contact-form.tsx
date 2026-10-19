@@ -26,7 +26,7 @@ export function ContactForm({ guard }: { guard: ReactNode }) {
 
   if (state.status === "sent") {
     return (
-      <p role="status" className="rounded border p-4">
+      <p role="status" className="rounded-md bg-secondary p-4 text-secondary-foreground">
         Thank you. Your message was received. We will reply by email.
       </p>
     );
@@ -49,10 +49,10 @@ export function ContactForm({ guard }: { guard: ReactNode }) {
         void handleSubmit(() => startTransition(() => formAction(new FormData(form))))(event);
       }}
       noValidate
-      className="relative flex flex-col gap-4"
+      className="relative flex flex-col gap-6"
     >
       {state.status === "error" && (
-        <p role="alert" className="rounded border border-destructive p-3 text-sm">
+        <p role="alert" className="border-l-2 border-destructive pl-4 font-medium text-destructive">
           {state.message}
         </p>
       )}
@@ -71,7 +71,7 @@ export function ContactForm({ guard }: { guard: ReactNode }) {
             {...register(f.name)}
           />
           {errorFor(f.name) && (
-            <p id={`${f.name}-error`} className="text-sm text-destructive">
+            <p id={`${f.name}-error`} className="text-[0.9375rem] text-destructive">
               {errorFor(f.name)}
             </p>
           )}
@@ -79,7 +79,7 @@ export function ContactForm({ guard }: { guard: ReactNode }) {
       ))}
       <div className="flex flex-col gap-2">
         <Label htmlFor="message">Message</Label>
-        <p id="message-hint" className="text-sm text-muted-foreground">
+        <p id="message-hint" className="text-[0.9375rem] text-muted-foreground">
           Please share only what is needed for us to reply. Private details can wait until we talk.
         </p>
         <Textarea
@@ -91,13 +91,13 @@ export function ContactForm({ guard }: { guard: ReactNode }) {
           {...register("message")}
         />
         {errorFor("message") && (
-          <p id="message-error" className="text-sm text-destructive">
+          <p id="message-error" className="text-[0.9375rem] text-destructive">
             {errorFor("message")}
           </p>
         )}
       </div>
       <Button type="submit" disabled={pending} className="min-h-11 self-start">
-        {pending ? "Sending..." : "Send message"}
+        {pending ? "Sending your message..." : "Send message"}
       </Button>
     </form>
   );
