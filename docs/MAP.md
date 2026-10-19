@@ -3,7 +3,7 @@
 Max 60 lines. Each task updates this instead of future tasks exploring. One line per key module: path - purpose - main exports.
 
 ## Root config
-- `package.json` - scripts: dev, build, typecheck (`next typegen && tsc --noEmit`), test, test:e2e, db:ensure, db:seed. `"type": "module"`.
+- `package.json` - all deps pinned exact per `docs/adr/001-versions.md`. Scripts: dev, build, typecheck (`next typegen && tsc --noEmit`), test, test:e2e, db:ensure, db:seed. `"type": "module"`.
 - `next.config.ts` - Next 16 (cacheComponents, partialPrefetching, Tailwind via turbopack loader).
 - `tsconfig.json` - strict, `@/*` -> `src/*`, `allowImportingTsExtensions` (scripts run via Node type stripping).
 - `eslint.config.mjs` - flat config, next core-web-vitals + typescript.

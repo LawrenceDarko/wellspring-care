@@ -15,20 +15,35 @@
     "db:seed": "node scripts/db-seed.ts"
   },
   "dependencies": {
+    "@auth/mongodb-adapter": "3.11.3",
+    "@date-fns/tz": "1.5.0",
+    "@hookform/resolvers": "6.0.0",
+    "date-fns": "4.4.0",
+    "lucide-react": "1.59.0",
+    "mongodb": "6.21.0",
     "next": "16.4.2",
-    "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "next-auth": "5.0.0-beta.32",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-email": "6.11.3",
+    "react-hook-form": "7.90.0",
+    "resend": "6.34.1",
+    "server-only": "0.0.1",
+    "stripe": "23.0.0",
+    "zod": "4.6.7"
   },
   "devDependencies": {
-    "@playwright/test": "^1.64.1",
-    "@tailwindcss/turbopack": "^4",
-    "@types/node": "^24.19.2",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
+    "@playwright/test": "1.64.1",
+    "@tailwindcss/turbopack": "4.3.3",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "9.39.5",
     "eslint-config-next": "16.4.2",
-    "tailwindcss": "^4",
-    "typescript": "^5",
-    "vitest": "^5.0.5"
+    "mongodb-memory-server": "11.3.0",
+    "shadcn": "4.22.1",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vitest": "5.0.5"
   }
 }
