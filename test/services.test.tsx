@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import {
   formatMoney,
+  groupServicesBySeason,
   ServiceDetail,
   ServicesDirectory,
   slugParam,
@@ -67,6 +68,21 @@ describe("services directory", () => {
     expect(screen.getByText(/not a medical, mental-health or emergency provider/)).toBeTruthy();
   });
 
+  it("groups all services by life season in season order, with anchors and unmapped last", () => {
+    const grief = { ...service, id: "s3", slug: "grief", name: "Grief care", category: { slug: "grief-and-hard-times", name: "Grief" } };
+    const other = { ...service, id: "s4", slug: "misc", name: "Misc care", category: { slug: "unmapped", name: "Unmapped" } };
+    expect(groupServicesBySeason([other, grief, service]).map((g) => g.key)).toEqual(["family", "loss", "other"]);
+
+    const { container } = render(<ServicesDirectory categories={categories} services={[other, grief, service]} />);
+    const h2s = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
+    expect(h2s).toEqual(["Family", "Loss and memorial", "Other care"]);
+    const family = container.querySelector("#season-family")!;
+    expect(within(family as HTMLElement).getByRole("link", { name: "Premarital preparation" })).toBeTruthy();
+    expect(container.querySelector("#season-loss")).not.toBeNull();
+    expect(container.querySelector("#season-marriage")).toBeNull();
+    expect(container.querySelector(".rounded-lg")).toBeNull();
+  });
+
   it("filters by category slug only and marks the current filter", () => {
     render(<ServicesDirectory categories={categories} services={[service]} selected="marriage-and-family" />);
     const nav = screen.getByRole("navigation", { name: "Service categories" });
@@ -101,7 +117,9 @@ describe("service detail", () => {
     render(<ServiceDetail service={detail} />);
     expect(screen.getByRole("heading", { level: 1, name: "Premarital preparation" })).toBeTruthy();
     expect(screen.getByText("Starting at $460")).toBeTruthy();
-    expect(screen.getByText(detail.eligibility!)).toBeTruthy();
+    const aside = screen.getByRole("complementary", { name: "Who this is for" });
+    expect(within(aside).getByText(detail.eligibility!)).toBeTruthy();
+    expect(within(aside).getByText(/Pastoral and spiritual care only/)).toBeTruthy();
     const card = screen.getByRole("heading", { level: 3, name: "6 sessions over 6 weeks" }).closest("li")!;
     expect(within(card).getByText("$460")).toBeTruthy();
     expect(within(card).getByText("6 x 60 minutes")).toBeTruthy();
@@ -109,6 +127,8 @@ describe("service detail", () => {
     expect(within(card).getByText("Workbook")).toBeTruthy();
     expect(within(card).getByText("25% deposit to reserve. Installments available")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Request this service" }).getAttribute("href")).toBe("/request/premarital");
+    // Package cards are the only cards on the page (ADR 006 rule 3).
+    expect([...document.querySelectorAll(".rounded-lg")]).toEqual([card]);
     expect(screen.getByRole("link", { name: "Marriage and Family" }).getAttribute("href")).toBe(
       "/services?category=marriage-and-family",
     );

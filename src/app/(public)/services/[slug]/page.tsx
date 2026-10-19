@@ -40,7 +40,7 @@ async function Detail({ params }: { params: PageProps<"/services/[slug]">["param
 
 export default function ServicePage({ params }: PageProps<"/services/[slug]">) {
   return (
-    <Suspense fallback={<div className="mx-auto w-full max-w-6xl px-4 py-14">Loading service...</div>}>
+    <Suspense fallback={<div className="mx-auto w-full max-w-6xl px-4 py-12 md:px-6 md:py-16">Loading service...</div>}>
       <Detail params={params} />
     </Suspense>
   );

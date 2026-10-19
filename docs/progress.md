@@ -1,8 +1,15 @@
 # Progress
 
-Current task: 1.9d Services restyle (then 1.9e, then 1.9 GATE)
+Current task: 1.9e Content, legal, contact, sign-in restyle (then 1.9 GATE)
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.9d Services restyle - done 2026-10-19
+- Done: directory per ADR 006: book-page header (h1, lede, scope note in margin column), quiet category filter (rounded-md, pale-moss selected, same `?category=` hrefs + `aria-current`). "All" view grouped by life season (`groupServicesBySeason` in services.tsx: season order, unmapped -> "Other care" last, empty seasons dropped), each a `<section id="season-<key>">` with gold numbered marker (aria-hidden, number = position in SEASONS) + season line; services as rows (name, summary, category, price), no cards. Filtered view: category h2 + summary + rows.
+- Detail: main column (breadcrumb, h1, summary, price, CTA as plain link, no nowrap Button) + margin aside "Who this is for" (eligibility + pastoral-care note), packages below a gold hairline as the only `rounded-lg` cards (2 col max).
+- Files: src/components/site/services.tsx, src/app/(public)/services/[slug]/page.tsx (fallback padding), test/services.test.tsx, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/services.test.tsx test/home.test.tsx test/seasons.test.ts` 16/16 pass (new: season grouping order + anchors + no cards in directory; aside holds eligibility + scope note; package card is the only card). `check:copy` ok.
+- Open: not rendered in a browser (360/1280 checked in 1.9 GATE). Marriage season has no categories, so `#season-marriage` never renders (home links it to /weddings). Category chips not ordered by season.
 
 ## 1.9c Home restyle - done 2026-10-19
 - Done: full home redesign per ADR 006. Forest-band hero: tagline in `type-display`, lede, CTAs "Request spiritual care" (/services) + "Explore programs" (/programs) as plain wrapping links (old Button had `whitespace-nowrap`), pastoral-only note, then the life-seasons path: labelled `<ol>` of 5 season links with gold numbered markers (aria-hidden) joined by a gold rule (down on mobile, across from lg), DB categories listed under their season. Below: book-page `Section` (gold hairline, optional margin note, `wide` for lists): renewal formats `dl` + margin note, ceremonies/families/chaplaincy 2-col list, events rows, testimonials as quotes, mission + values `dl`. No cards.
@@ -33,13 +40,7 @@ Current task: 1.9d Services restyle (then 1.9e, then 1.9 GATE)
 - Tests: typecheck pass; eslint clean; `npx vitest run test/contact.test.ts test/form-guard.test.tsx test/rate-limit.test.ts test/db-ensure.test.ts test/auth.test.ts` 21/21 pass (valid stores exactly allowlisted keys + generic email, outbox write, no-email still stores, honeypot, forged/fast/missing token, field errors, IP + email limits, hashed keys). `check:copy` ok.
 - Open: ContactForm client + sign-in action guard not exercised in tests (no render of server-action modules); verify in 1.9 Playwright (contact submit must wait >3s MIN_FILL_MS). Sign-in submitted within 3s shows "form expired". No staff read of contact_messages yet; retention purge not built.
 
-## 1.7 Legal + scope pages - done 2026-10-19
-- Done: six MDX drafts in `src/content/legal/` (privacy, terms, cancellation, refund, accessibility, service-scope) at `/legal/<slug>` (matches `LEGAL_NAV`). `LegalPage` wrapper (`src/components/site/content.tsx`) renders `DraftBanner` "Draft - requires legal review" in every environment above the body. Org/counsel facts (entity, governing law, notice windows, refund rules, confidentiality limits, state privacy rights) are `TodoOrg`. Service scope renders `EmergencyNotice`.
-- `scripts/copy-check.ts` (`npm run check:copy`): rules for therapy/psychotherapy, clinical/professional counseling, guarantee, cure, healing, promise, proven/miracle, HIPAA compliance claims, credential words (certified, accredited, endorsed by), inaccurate faith names. Allowed when a negation precedes it in the same sentence. Skips `TodoOrg` blocks and code comments. Requires `<EmergencyNotice` in prayer + service-scope. Scans `src/content`, `src/components/site`, `src/app/(public)` (.mdx/.tsx).
-- Files: src/components/site/content.tsx, src/content/legal/*.mdx (6), src/app/(public)/legal/*/page.tsx (6), scripts/copy-check.ts, test/legal-pages.test.tsx, package.json, docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/legal-pages.test.tsx test/content-pages.test.tsx` 25/25 pass (banner before body, every LEGAL_NAV route + MDX exists, copy-check passes on all content, 8 banned phrases flagged, negation scoped to sentence, TodoOrg/comments skipped, emergency notice required). `npm run check:copy` -> ok.
-- Open: MDX pages not rendered (no dev server/build until 1.9 GATE). Retention periods quote PRD §13.7 defaults (ADR not written yet). Copy-check is a heuristic: a negation anywhere earlier in the sentence excuses a phrase. Contact page (1.8) is .tsx and is in scan scope; emergency notice on Contact is not enforced by the script.
-
+- 1.7 Legal + scope pages - done 2026-10-19: six legal MDX drafts at `/legal/<slug>` in `LegalPage` + `DraftBanner`, org facts as `TodoOrg`, `npm run check:copy` (PRD §15.3 banned phrases, emergency notice required).
 - 1.6 Content pages - done 2026-10-19: MDX via `@next/mdx`, six pages in `ContentPage`, `TodoOrg` pending blocks (hidden in production), `contentComponents`.
 - 1.5 Services directory + detail - done 2026-10-19: `/services` (category chips, `?category=`) + `/services/[slug]` with packages, `startingPrice`, `slugParam`; request href `/request/<slug>` (404 until Phase 2).
 - 1.4 Home page - done 2026-10-19: `HomeSections` per PRD §4.3, `events`/`testimonials` collections (publish needs consent), cached loader with defaults on ConfigError.
