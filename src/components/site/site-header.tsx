@@ -34,7 +34,7 @@ export function SkipLink() {
  */
 export function SiteHeader({ siteName }: { siteName: string }) {
   return (
-    <HeaderScroll className="group/header sticky top-0 z-40 border-b border-border bg-background text-foreground transition-[translate,background-color,border-color] duration-300 ease-out data-hidden:-translate-y-full data-over-hero:not-has-[[data-state=open]]:header-over-hero">
+    <HeaderScroll className="group/header sticky top-0 z-40 border-b border-border bg-background text-foreground transition-[translate,background-color,border-color] duration-300 ease-out data-hidden:-translate-y-full data-[over-hero=band]:not-has-[[data-state=open]]:header-over-hero data-[over-hero=light]:not-has-[[data-state=open]]:border-transparent data-[over-hero=light]:not-has-[[data-state=open]]:bg-transparent">
       <div className="mx-auto flex min-h-header w-full max-w-6xl items-center justify-between gap-6 px-4 py-2 md:px-6">
         {/* Two lines on narrow screens and at lg: a long org name never squeezes the nav. */}
         <Link

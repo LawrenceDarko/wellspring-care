@@ -127,7 +127,7 @@ describe("site shell", () => {
       });
     };
     await scrollTo(0);
-    expect(header.hasAttribute("data-over-hero")).toBe(true);
+    expect(header.getAttribute("data-over-hero")).toBe("band"); // any other data-hero = forest band
     expect(header.hasAttribute("data-hidden")).toBe(false);
     await scrollTo(900);
     expect(header.hasAttribute("data-over-hero")).toBe(false);
@@ -135,6 +135,19 @@ describe("site shell", () => {
     await scrollTo(700);
     expect(header.hasAttribute("data-hidden")).toBe(false);
     Object.defineProperty(window, "scrollY", { value: 0, configurable: true });
+  });
+
+  it("over a light hero the header takes the light tone (see-through, linen tokens)", async () => {
+    render(
+      <>
+        <SiteHeader siteName="Test" />
+        <section data-hero="light" ref={(el) => void (el && (el.getBoundingClientRect = () => ({ bottom: 600 }) as DOMRect))} />
+      </>,
+    );
+    await act(async () => {
+      await new Promise((r) => requestAnimationFrame(() => r(null)));
+    });
+    expect(screen.getByRole("banner").getAttribute("data-over-hero")).toBe("light");
   });
 
   it("footer shows emergency notice with 911 and 988, legal links, not-configured contact", () => {

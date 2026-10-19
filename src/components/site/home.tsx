@@ -1,12 +1,16 @@
 import Link from "next/link";
+import { Landscape } from "@/components/art";
+import { Reveal } from "@/components/motion";
 import { groupBySeason } from "@/domain/seasons";
 import type { PublicCategory } from "@/server/data/catalog";
 import type { PublicEvent, PublicTestimonial } from "@/server/data/content";
 import type { SiteSettings } from "@/server/data/settings";
+import { HomeHero, SeasonsChapter, type ChapterSeason } from "./home-story";
 
-// Home page sections (PRD §4.3, ADR 006). Pure props so it renders in tests without a DB.
-// The seasons path on the forest band is the page's one bold element; everything below
-// is a quiet book page: left aligned, lists not cards, gold hairlines, margin notes.
+// Home page (PRD §4.3) as the ADR 007 scroll story: the spring at dawn (pinned hero), downstream
+// through the five seasons (forest chapter), the remaining sections as quiet book pages with
+// reveals, and the still pool where the visitor asks for care. Pure props so it renders in tests
+// without a DB; motion lives in the client islands and never hides content in the server HTML.
 // Copy follows PRD §15.3: no promised outcomes, no "therapy", no invented facts.
 // Events and testimonials sections are omitted entirely when there is no data.
 
@@ -19,7 +23,6 @@ export type HomeData = {
 
 const focus = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 const textLink = `font-medium text-primary underline decoration-gold underline-offset-4 hover:decoration-2 ${focus}`;
-const bandLink = `underline decoration-band-gold underline-offset-4 hover:decoration-2 ${focus}`;
 const cta = `inline-flex min-h-11 items-center justify-center rounded-md px-6 py-2 text-center font-medium ${focus}`;
 
 function Section({
@@ -42,66 +45,29 @@ function Section({
       aria-labelledby={id}
       className="grid gap-6 border-t border-gold/40 py-12 first:border-t-0 md:py-16 lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-x-16"
     >
-      <div className={`flex min-w-0 flex-col gap-5 ${wide ? "lg:col-span-2" : "max-w-measure"}`}>
+      <Reveal className={`flex min-w-0 flex-col gap-5 ${wide ? "lg:col-span-2" : "max-w-measure"}`}>
         <h2 id={id} className="text-h2 font-medium">
           {title}
         </h2>
         {children}
-      </div>
+      </Reveal>
       {note ? (
-        <aside className="self-start border-l-2 border-gold pl-4 text-[0.9375rem] text-muted-foreground lg:mt-16">
-          {note}
-        </aside>
+        <Reveal delay={0.15} className="self-start lg:mt-16">
+          <aside className="border-l-2 border-gold pl-4 text-[0.9375rem] text-muted-foreground">{note}</aside>
+        </Reveal>
       ) : null}
     </section>
   );
 }
 
-// Gold rule from each marker to the next: down on mobile, across from lg (gap-8 / gap-6).
-const connector =
-  "not-last:before:absolute not-last:before:top-10 not-last:before:-bottom-8 not-last:before:left-5 not-last:before:w-px not-last:before:bg-band-gold/60 lg:not-last:before:top-5 lg:not-last:before:-right-6 lg:not-last:before:bottom-auto lg:not-last:before:left-10 lg:not-last:before:h-px lg:not-last:before:w-auto";
-
-function SeasonsPath({ categories }: { categories: PublicCategory[] }) {
-  const { seasons } = groupBySeason(categories);
-  return (
-    <div className="flex flex-col gap-6">
-      <h2 id="home-seasons" className="text-lede font-medium">
-        Care for each season of life
-      </h2>
-      <ol aria-labelledby="home-seasons" className="grid gap-8 lg:grid-cols-5 lg:gap-6">
-        {seasons.map(({ season, items }, i) => (
-          <li key={season.key} className={`relative grid min-w-0 grid-cols-[2.5rem_minmax(0,1fr)] gap-x-4 lg:grid-cols-1 lg:gap-y-4 ${connector}`}>
-            <span
-              aria-hidden="true"
-              className="relative z-10 flex size-10 items-center justify-center rounded-full border border-band-gold bg-band font-display text-band-gold"
-            >
-              {i + 1}
-            </span>
-            <div className="flex min-w-0 flex-col gap-1.5">
-              <Link
-                href={season.href}
-                className={`self-start font-display text-h3 font-medium leading-tight ${bandLink}`}
-              >
-                {season.name}
-              </Link>
-              <p className="text-band-muted">{season.line}</p>
-              {items.length > 0 ? (
-                <ul className="mt-1 flex flex-col gap-1 text-[0.9375rem]">
-                  {items.map((c) => (
-                    <li key={c.id}>
-                      <Link href={`/services?category=${c.slug}`} className={bandLink}>
-                        {c.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </div>
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
+function chapterSeasons(categories: PublicCategory[]): ChapterSeason[] {
+  return groupBySeason(categories).seasons.map(({ season, items }) => ({
+    key: season.key,
+    name: season.name,
+    line: season.line,
+    href: season.href,
+    categories: items.map(({ id, slug, name }) => ({ id, slug, name })),
+  }));
 }
 
 function formatEventDate(event: PublicEvent, timeZone: string) {
@@ -145,37 +111,33 @@ const values = [
 export function HomeSections({ settings, categories, events, testimonials }: HomeData) {
   return (
     <div className="flex flex-col">
-      {/* `data-hero`: pulled up under the sticky header, which turns see-through over it (ADR 007 Nav). */}
-      <section aria-labelledby="home-hero" data-hero className="band -mt-header pt-header">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 pt-12 pb-14 md:gap-16 md:px-6 md:pt-20 md:pb-20">
-          <div className="flex flex-col gap-6">
-            <h1 id="home-hero" className="type-display max-w-4xl break-words">
-              {settings.tagline ?? settings.name}
-            </h1>
-            <p className="max-w-measure text-lede text-band-muted">
-              {settings.name} offers Christian chaplaincy, pastoral and spiritual care, renewal programs, and
-              ceremonies for weddings, funerals and memorials.
-            </p>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Link href="/services" className={`${cta} bg-band-foreground text-band hover:bg-secondary`}>
-                Request spiritual care
-              </Link>
-              <Link
-                href="/programs"
-                className={`${cta} border border-band-foreground/70 hover:bg-band-foreground/10`}
-              >
-                Explore programs
-              </Link>
-            </div>
-            <p className="max-w-measure text-[0.9375rem] text-band-muted">
-              Pastoral and spiritual care only. We are not a medical, mental-health or emergency provider.
-            </p>
+      <HomeHero labelledBy="home-hero">
+        <div className="flex max-w-3xl flex-col gap-6">
+          <h1 id="home-hero" className="type-display break-words">
+            {settings.tagline ?? settings.name}
+          </h1>
+          <p className="max-w-measure text-lede">
+            {settings.name} offers Christian chaplaincy, pastoral and spiritual care, renewal programs, and
+            ceremonies for weddings, funerals and memorials.
+          </p>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link href="/services" className={`${cta} bg-primary text-primary-foreground hover:bg-primary/90`}>
+              Request spiritual care
+            </Link>
+            <Link
+              href="/programs"
+              className={`${cta} border border-foreground/70 bg-background/70 hover:bg-background`}
+            >
+              Explore programs
+            </Link>
           </div>
-          <div className="border-t border-band-gold/50 pt-10">
-            <SeasonsPath categories={categories} />
-          </div>
+          <p className="max-w-measure text-[0.9375rem]">
+            Pastoral and spiritual care only. We are not a medical, mental-health or emergency provider.
+          </p>
         </div>
-      </section>
+      </HomeHero>
+
+      <SeasonsChapter seasons={chapterSeasons(categories)} />
 
       <div className="mx-auto w-full max-w-6xl px-4 md:px-6">
         <Section
@@ -282,6 +244,30 @@ export function HomeSections({ settings, categories, events, testimonials }: Hom
           </div>
         </Section>
       </div>
+
+      <section aria-labelledby="home-still-pool" className="band">
+        <Landscape parallax className="h-40 md:h-64" />
+        <Reveal className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-14 md:px-6 md:py-20">
+          <h2 id="home-still-pool" className="text-h2 font-medium">
+            When you are ready, ask for care
+          </h2>
+          <p className="max-w-measure text-lede text-band-muted">
+            Choose the care that fits your season and send a short request. You decide what to share, and
+            asking costs nothing.
+          </p>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link href="/services" className={`${cta} bg-band-foreground text-band hover:bg-secondary`}>
+              Find care by season
+            </Link>
+            <Link href="/contact" className={`${cta} border border-band-foreground/70 hover:bg-band-foreground/10`}>
+              Contact us
+            </Link>
+          </div>
+          <p className="max-w-measure text-[0.9375rem] text-band-muted">
+            Pastoral and spiritual care only. In an emergency, call 911.
+          </p>
+        </Reveal>
+      </section>
     </div>
   );
 }

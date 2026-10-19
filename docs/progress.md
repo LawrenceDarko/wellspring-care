@@ -1,8 +1,15 @@
 # Progress
 
-Current task: 1.10f Home story (then 1.10g-h, GATE, then 2.1)
+Current task: 1.10g RESEARCH Stock media (then 1.10h, GATE, then 2.1)
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.10f Home story - done 2026-10-19
+- Done: `src/components/site/home-story.tsx` client islands. `HomeHero`: light dawn hero (`data-hero="light"`), `LANDSCAPE_LAYERS` full-bleed with `WellspringShader` as the sky (SVG `Sky` fallback); from md + motion, pinned 60% scrub: layers scale by depth (foreground most), birds rise, copy drifts up (never fades). `SeasonsChapter`: forest band, `<ol>` of five seasons each with inline vignette, line, category links; from lg + motion (`story` state) items become 60svh scenes, sticky stage crossfades the active vignette (ScrollTrigger per scene), gold stream line scrubbed, active marker filled. `home.tsx`: hero -> chapter -> book-page `Section`s wrapped in `Reveal` -> closing still-pool band (`Landscape parallax` strip, "Find care by season" /services, "Contact us"). Data unchanged.
+- Header: `HeaderScroll` sets `data-over-hero="light|band"` from the hero; light = see-through with linen tokens (charcoal on the dawn sky), band = existing `header-over-hero`.
+- Files: src/components/site/{home.tsx,home-story.tsx,header-scroll.tsx,site-header.tsx}, test/{home,site-shell}.test.tsx, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/home.test.tsx test/site-shell.test.tsx test/art.test.tsx test/shader.test.tsx test/motion.test.tsx test/contrast.test.ts` 47/47 (home 8: CTAs, light hero no canvas under reduced motion, five season links in order in an `<ol>` with line + vignette, no story attrs without motion, still-pool CTA, server HTML holds all text with no inline from-states, empty sections hidden; site-shell: light tone). `check:copy` ok.
+- Open: not run in a browser (no dev server in this task): pin + scene timing, hero copy contrast over the shader light, and 360 px layout to check in 1.10 GATE. Hero pin is md+ only; mobile has reveals and inline vignettes. `home.test` stubs matchMedia (gsap needs it at import).
 
 ## 1.10e Hero shader - done 2026-10-19
 - Done: `src/domain/shader.ts` `canRunShader(env)` (WebGL2, no reduced motion, no saveData, width >= 768), `shaderPixelRatio` (cap 1.5, floor 1). `src/components/art/wellspring-shader.tsx` `WellspringShader({fallback = <Sky/>})`: raw WebGL2, one full-screen triangle from `gl_VertexID` (no buffers), fragment = the `Sky` dawn on the same 1440x900 slice coords + slow sun rays + drifting water-light bands; palette uniforms read from `--art-*` via getComputedStyle. Guard is live (useSyncExternalStore on reduce/width queries + connection change; server = false). Fallback always rendered under the canvas (LCP stays SVG); canvas fades in after first frame. IntersectionObserver + visibilitychange pause, context lost/restored, compile/no-context failure removes canvas silently, cleanup cancels rAF, disconnects, `loseContext`.
@@ -34,15 +41,7 @@ Current task: 1.10f Home story (then 1.10g-h, GATE, then 2.1)
 - Tests: typecheck pass; eslint clean; `npx vitest run test/site-shell.test.tsx test/home.test.tsx test/contrast.test.ts test/legal-pages.test.tsx test/content-pages.test.tsx test/services.test.tsx` 58/58 (site-shell 12: skip link first, groups/links/Request care, every route from desktop menus and mobile overlay, Escape + focus return both menus, link closes overlay, footer Site nav, hide/show + over-hero attributes, 44px targets). `check:contrast` 28/28, `check:copy` ok. New Tailwind classes verified by compiling globals.css.
 - Open: not rendered in a browser (task did not call for the dev server; 1.10 GATE Playwright covers 360/1280 + keyboard menus). Hero is linen-headed for a frame before hydration. /events and /resources still 404 (later phases). Desktop flat links are plain `Link`s (Tab, not arrow keys).
 
-## 1.10a RESEARCH Motion + imagery direction - done 2026-10-19
-- Done: user found the UI flat and the header broken (wordmark row + second row of ten links) and asked for a scroll-story redesign. User chose GSAP + Lenis, original vectors + licensed stock, one hero shader. ADR 007: "wellspring" story (spring -> five seasons downstream -> still pool CTA), progressive enhancement + reduced-motion = static, raw WebGL2 shader with guards, stock rules (no faces beside quotes), one-row grouped nav with "Request care". Supersedes ADR 006 rules 1 and 5 on public pages.
-- Installed exact: gsap 3.15.0, @gsap/react 2.1.2, lenis 1.3.26 (ADR 001 row). No OGL/three.js.
-- PLAN.md: Phase 1.10 tasks 1.10b-h + GATE inserted before Phase 2.
-- Files: package.json, package-lock.json, docs/adr/{001,006,007,README}, docs/{PLAN,progress,MAP}.md.
-- Tests: `npm ls gsap @gsap/react lenis` clean; `npm run typecheck` pass. No code changed, no vitest run.
-- Decided (user delegated): header first (now 1.10b, motion foundation 1.10c); Contact top level; "Request care" -> /services.
-- Open: Stock picks are sourced in 1.10g (RESEARCH). Install still blocks esbuild/fsevents/unrs-resolver/mongodb-memory-server scripts (as before).
-
+- 1.10a RESEARCH Motion + imagery direction - done 2026-10-19: ADR 007 wellspring story, GSAP + Lenis + one raw WebGL2 shader, stock rules, one-row grouped nav; gsap 3.15.0, @gsap/react 2.1.2, lenis 1.3.26 pinned; PLAN 1.10b-h + GATE.
 - 1.9 GATE + write Phase 2 tasks - done 2026-10-19: first Playwright smoke (home -> services -> detail -> contact at 360/1280, no horizontal scroll), hermetic `test/e2e/server.ts`, Phase 2 tasks 2.1-2.10 written; 134/134 vitest, build ok, e2e 2/2.
 - 1.9e Content, legal, contact, sign-in restyle - done 2026-10-19: `ContentPage` book page (measure, lede, gold hairline h2, margin note), `LegalPage` draft notice in margin, contact book-page + clearer `CONTACT_MESSAGES`, sign-in on shadcn inputs.
 - 1.9d Services restyle - done 2026-10-19: directory grouped by life season (`groupServicesBySeason`, `#season-<key>`, gold markers, rows not cards), quiet category filter, detail with margin aside + package cards.

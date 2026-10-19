@@ -8,7 +8,8 @@ const DIRECTION_SLOP = 6;
 
 /**
  * Sticky header shell (ADR 007 Nav). Sets attributes only; CSS does the rest:
- * - `data-over-hero` while a `[data-hero]` element is still under the header,
+ * - `data-over-hero` while a `[data-hero]` element is still under the header, set to the hero's
+ *   tone: `light` for `data-hero="light"` (the home dawn sky), otherwise `band` (forest band),
  * - `data-scrolled` once the page has moved,
  * - `data-hidden` on scroll down, cleared on scroll up, on focus inside, or while a menu is open.
  * A passive scroll listener batched to one frame; no GSAP. Lenis (MotionProvider) moves native
@@ -30,7 +31,8 @@ export function HeaderScroll({ className, children }: { className?: string; chil
       const y = Math.max(window.scrollY, 0);
       const height = header.offsetHeight;
       const hero = document.querySelector<HTMLElement>("[data-hero]");
-      header.toggleAttribute("data-over-hero", hero !== null && hero.getBoundingClientRect().bottom > height);
+      if (hero && hero.getBoundingClientRect().bottom > height) header.dataset.overHero = hero.dataset.hero === "light" ? "light" : "band";
+      else header.removeAttribute("data-over-hero");
       header.toggleAttribute("data-scrolled", y > 0);
 
       if (Math.abs(y - lastY) < DIRECTION_SLOP) return;

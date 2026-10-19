@@ -1,6 +1,19 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+// GSAP's ScrollTrigger needs matchMedia at import; answer "reduced motion" so the islands stay static.
+vi.hoisted(() => {
+  window.matchMedia = ((query: string) => ({
+    matches: query.includes("prefers-reduced-motion: reduce"),
+    media: query,
+    addEventListener() {},
+    removeEventListener() {},
+    addListener() {},
+    removeListener() {},
+  })) as unknown as typeof window.matchMedia;
+});
 import { cleanup, render, screen, within } from "@testing-library/react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { SEASONS } from "@/domain/seasons";
 import { HomeSections, type HomeData } from "@/components/site/home";
 import { SETTINGS_DEFAULTS } from "@/server/data/settings";
@@ -17,7 +30,16 @@ describe("home page", () => {
     expect(screen.getByRole("link", { name: "Explore programs" }).getAttribute("href")).toBe("/programs");
   });
 
-  it("hero holds the seasons path as a labelled ordered list of season links, in order", () => {
+  it("hero is the light dawn landscape the header reads its tone from", () => {
+    render(<HomeSections {...empty} />);
+    const hero = screen.getByRole("heading", { level: 1 }).closest("section")!;
+    expect(hero.getAttribute("data-hero")).toBe("light");
+    // Art is decorative; under reduced motion the shader guard keeps the SVG sky only.
+    expect(hero.querySelector('[aria-hidden="true"] svg')).toBeTruthy();
+    expect(hero.querySelector("canvas")).toBeNull();
+  });
+
+  it("downstream chapter lists the five seasons as an ordered list of links, in order", () => {
     render(<HomeSections {...empty} />);
     const path = screen.getByRole("list", { name: "Care for each season of life" });
     expect(path.tagName).toBe("OL");
@@ -27,9 +49,43 @@ describe("home page", () => {
     SEASONS.forEach((season, i) => {
       const link = within(items[i]).getByRole("link", { name: season.name });
       expect(link.getAttribute("href")).toBe(season.href);
+      expect(items[i].textContent).toContain(season.line);
+      // Each scene carries its own vignette inline (no JS needed to see it).
+      expect(items[i].querySelector('[aria-hidden="true"] svg')).toBeTruthy();
     });
     // Markers are decorative; the list itself carries the order.
     expect(items[0].querySelector('[aria-hidden="true"]')?.textContent).toBe("1");
+    // Without motion there is no story stage and no active scene.
+    expect(path.closest("section")?.hasAttribute("data-story")).toBe(false);
+    expect(path.querySelector("[data-active]")).toBeNull();
+  });
+
+  it("closes at the still pool with a request CTA", () => {
+    render(<HomeSections {...empty} />);
+    expect(screen.getByRole("heading", { level: 2, name: "When you are ready, ask for care" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Find care by season" }).getAttribute("href")).toBe("/services");
+    expect(screen.getByRole("link", { name: "Contact us" }).getAttribute("href")).toBe("/contact");
+  });
+
+  it("server HTML (no JS) holds every heading and line, with no hidden from-states", () => {
+    const html = renderToStaticMarkup(<HomeSections {...empty} settings={{ ...SETTINGS_DEFAULTS, tagline: "Test tagline" }} />);
+    for (const text of [
+      "Test tagline",
+      "Request spiritual care",
+      "Explore programs",
+      "Care for each season of life",
+      ...SEASONS.flatMap((s) => [s.name, s.line]),
+      "Spiritual Renewal Journey",
+      "Ceremonies, families and chaplaincy",
+      "Our mission and values",
+      "When you are ready, ask for care",
+    ]) {
+      expect(html, text).toContain(text);
+    }
+    // SVG art uses stop-opacity and transform attributes; content must have no inline from-state.
+    expect(html).not.toMatch(/(?<![-\w])opacity:\s*0(?![.\d])|visibility:\s*hidden|style="[^"]*(transform|translate)/);
+    expect(html).not.toContain("data-story");
+    expect(html).not.toContain("<canvas");
   });
 
   it("renders the fixed sections", () => {
