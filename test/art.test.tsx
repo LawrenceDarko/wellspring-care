@@ -9,13 +9,14 @@ vi.mock("@/components/motion", () => ({
   Parallax: ({ children, speed }: { children: React.ReactNode; speed: number }) => (
     <div data-speed={speed}>{children}</div>
   ),
+  prefersReducedMotion: () => true,
 }));
 
 const { ART_TOKENS, LANDSCAPE_LAYERS, Landscape, SEASON_ART, SeasonArt } = await import("@/components/art");
 
 const HEX = /#[0-9a-f]{3,8}\b/i;
 const read = (path: string) => readFileSync(new URL(path, import.meta.url), "utf8");
-const SOURCES = ["landscape.tsx", "seasons-art.tsx", "tokens.ts"].map((f) => [f, read(`../src/components/art/${f}`)]);
+const SOURCES = ["landscape.tsx", "seasons-art.tsx", "tokens.ts", "wellspring-shader.tsx"].map((f) => [f, read(`../src/components/art/${f}`)]);
 
 /** Every <svg> in the markup, as its opening tag. */
 const svgTags = (html: string) => html.match(/<svg[^>]*>/g) ?? [];

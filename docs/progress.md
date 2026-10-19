@@ -1,8 +1,15 @@
 # Progress
 
-Current task: 1.10e Hero shader (then 1.10f-h, GATE, then 2.1)
+Current task: 1.10f Home story (then 1.10g-h, GATE, then 2.1)
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.10e Hero shader - done 2026-10-19
+- Done: `src/domain/shader.ts` `canRunShader(env)` (WebGL2, no reduced motion, no saveData, width >= 768), `shaderPixelRatio` (cap 1.5, floor 1). `src/components/art/wellspring-shader.tsx` `WellspringShader({fallback = <Sky/>})`: raw WebGL2, one full-screen triangle from `gl_VertexID` (no buffers), fragment = the `Sky` dawn on the same 1440x900 slice coords + slow sun rays + drifting water-light bands; palette uniforms read from `--art-*` via getComputedStyle. Guard is live (useSyncExternalStore on reduce/width queries + connection change; server = false). Fallback always rendered under the canvas (LCP stays SVG); canvas fades in after first frame. IntersectionObserver + visibilitychange pause, context lost/restored, compile/no-context failure removes canvas silently, cleanup cancels rAF, disconnects, `loseContext`.
+- `/dev/ui` "Vector art" block shows the shader.
+- Files: src/domain/shader.ts, src/components/art/{wellspring-shader.tsx,index.ts}, src/app/dev/ui/page.tsx, test/{shader,art}.test.tsx, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/shader.test.tsx test/art.test.tsx` 15/15 (guard table, DPR cap, SSR fallback no canvas, fallback only under reduced/narrow/no WebGL2/no matchMedia, no context -> canvas dropped, fake GL: no draw until visible, draws + fades in, pauses offscreen, releases on unmount). Temporary `next dev` (:3210, own distDir, killed, removed; tsconfig glob reverted) + scratch Playwright on `/dev/ui`: 1280 canvas present + opacity-100, screenshot matches the SVG sky; reduced motion and 360 px: no canvas; no console errors (only Chrome "GPU stall due to ReadPixels" driver warnings, also seen at 360 without the canvas = screenshot readback).
+- Open: water-light motion is very subtle in the screenshot (tune with the hero in 1.10f); not run on a real GPU/Safari.
 
 ## 1.10d Vector art set - done 2026-10-19
 - Done: `src/components/art/`: `tokens.ts` (`ART_TOKENS`, `art(token)` -> `var(--art-*)`, shared `treePath`), `landscape.tsx` (wellspring at dawn: `Sky` (gradient, sun glow), `FarHills`, `NearHills`, `Water` (spring + stream, sun glints), `Trees` (foreground banks + trees), `Birds`; each its own aria-hidden `<svg>` on viewBox 1440x900, `xMidYMax slice`, shapes run past the bottom with overflow visible), `LANDSCAPE_LAYERS` (depths: sky 0.3, far 0.2, near hills + water 0.1, trees 0, birds 0.36), `Landscape({parallax?})` (clipped box, wraps moving layers in `Parallax`). `seasons-art.tsx`: five vignettes (320x200) on the one stream, each at its own hour: confluence, tree household, spring rings + shoot, lit house window, moonlit still pool + cairn; `SEASON_ART`, `SeasonArt({season})`. Barrel `index.ts`.
@@ -36,14 +43,7 @@ Current task: 1.10e Hero shader (then 1.10f-h, GATE, then 2.1)
 - Decided (user delegated): header first (now 1.10b, motion foundation 1.10c); Contact top level; "Request care" -> /services.
 - Open: Stock picks are sourced in 1.10g (RESEARCH). Install still blocks esbuild/fsevents/unrs-resolver/mongodb-memory-server scripts (as before).
 
-## 1.9 GATE + write Phase 2 tasks - done 2026-10-19
-- Done: GATE on the ADR 006 UI. First Playwright spec `test/e2e/smoke.spec.ts`: home -> "Request spiritual care" -> /services -> first service detail -> /contact submit (waits 3.5s for the form guard), at 360 and 1280 px, asserting no horizontal scroll on each page.
-- E2E is hermetic: `test/e2e/server.ts` starts MongoMemoryReplSet, `ensureCollections`, `seedCatalog({activatePackages})`, then `next dev --port 3100` with throwaway AUTH_SECRET/FIELD_ENC_KEY, Resend blanked (dev outbox). `distDir` via `E2E_DIST_DIR` (`.next-e2e`) because Next 16 allows one `next dev` per dir (user's :3000 server was running). Config: one chromium project, `reuseExistingServer: false`. tsconfig gains `.next-e2e` type globs (Next adds them otherwise).
-- PLAN.md: Phase 2 tasks 2.1-2.10 written (outline line removed).
-- Files: test/e2e/{server,smoke.spec}.ts, playwright.config.ts, next.config.ts, tsconfig.json, .gitignore, docs.
-- Tests: typecheck pass; `npx eslint src test scripts` clean; `npx vitest run` 134/134 (22 files); `next build` ok (23 routes, built without env so home/settings use defaults); `npm run test:e2e` 2/2 pass (run twice). Playwright chromium-headless-shell 1248 downloaded (pinned 1.64.1 needed it).
-- Open: smoke covers only one service and Chromium; no 768 px check; IDOR suite has no Phase 2 repos yet. 1.9b-e "not rendered" items now covered only by the no-scroll check, not visual review. New capability `requests:triage` (2.7) is not in PRD §2: confirm with the org.
-
+- 1.9 GATE + write Phase 2 tasks - done 2026-10-19: first Playwright smoke (home -> services -> detail -> contact at 360/1280, no horizontal scroll), hermetic `test/e2e/server.ts`, Phase 2 tasks 2.1-2.10 written; 134/134 vitest, build ok, e2e 2/2.
 - 1.9e Content, legal, contact, sign-in restyle - done 2026-10-19: `ContentPage` book page (measure, lede, gold hairline h2, margin note), `LegalPage` draft notice in margin, contact book-page + clearer `CONTACT_MESSAGES`, sign-in on shadcn inputs.
 - 1.9d Services restyle - done 2026-10-19: directory grouped by life season (`groupServicesBySeason`, `#season-<key>`, gold markers, rows not cards), quiet category filter, detail with margin aside + package cards.
 - 1.9c Home restyle - done 2026-10-19: forest-band hero (tagline, CTAs, pastoral-only note) + life-seasons `<ol>` path (`src/domain/seasons.ts`), book-page `Section`s below, no cards; header nav on its own row from xl.

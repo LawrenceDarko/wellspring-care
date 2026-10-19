@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Landscape, SEASON_ART } from "@/components/art";
+import { Landscape, SEASON_ART, WellspringShader } from "@/components/art";
 import { MotionProvider, Parallax, Reveal } from "@/components/motion";
 import { SEASONS } from "@/domain/seasons";
 import { Badge } from "@/components/ui/badge";
@@ -283,6 +283,11 @@ export default function DevUiPage() {
             --art-* tokens.
           </p>
           <Landscape parallax className="h-[28rem] rounded-lg lg:h-[36rem]" />
+          <p className="max-w-measure text-muted-foreground">
+            The hero shader: the same dawn sky with moving light, from 768px
+            with motion allowed and data saver off. Otherwise the static sky.
+          </p>
+          <WellspringShader className="h-[28rem] rounded-lg lg:h-[36rem]" />
           <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
             {SEASONS.map((season) => {
               const Art = SEASON_ART[season.key];
