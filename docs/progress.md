@@ -1,8 +1,15 @@
 # Progress
 
-Current task: 1.5 Services directory + detail
+Current task: 1.6 Content pages
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.5 Services directory + detail - done 2026-10-19
+- Done: `/services` directory (category chips, `?category=<slug>` is the only param, `aria-current` on filter, unknown category -> status note + all services, "From $X" or "Pricing on request") and `/services/[slug]` detail (breadcrumb, starting price, eligibility + pastoral-care-only note, package cards: price, sessions, duration, channels, response time, inclusions, deposit/installments, "Request this service" -> `/request/<slug>`). Both pages: Suspense + `"use cache"` tag `catalog`, cacheLife minutes, ConfigError -> empty/404.
+- Repository: `startingPrice(packages)`; `listServices` and `getServiceBySlug` add `startingPrice` (cheapest active package; absent when none). `slugParam` rejects malformed slugs before any DB read.
+- Files: src/server/data/catalog.ts, src/components/site/services.tsx, src/app/(public)/services/{page.tsx,[slug]/page.tsx}, test/{services.test.tsx,catalog.test.ts}, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/services.test.tsx test/catalog.test.ts test/home.test.tsx` 19/19 pass (slug param validation, directory links/filter/empty/unknown, detail packages/price/eligibility/request href, inactive package excluded from starting price).
+- Open: not rendered with dev server or `next build` (Suspense + params under cacheComponents unverified until 1.9 GATE). `/request/<slug>` 404s until Phase 2 intake (route name chosen here, Phase 2 should use it). Price is per package currency; mixed currencies not compared. Admin catalog writes must `revalidateTag("catalog")`.
 
 ## 1.4 Home page - done 2026-10-19
 - Done: `HomeSections` (pure props) per PRD §4.3: hero (tagline from settings, "Request Spiritual Care" -> /services until intake exists, "Explore Programs" -> /programs, pastoral-care-only line), active categories (links `/services?category=<slug>`), 4/8-week renewal (not-a-cure line), weddings/funerals, family + chaplaincy, events, testimonials, mission/values. Events and testimonials sections omitted when empty.
@@ -36,13 +43,7 @@ Current task: 1.5 Services directory + detail
 - Tests: typecheck pass; eslint clean on touched files; `npm run check:contrast` 25/25 pass (lowest: input border 3.58, gold-foreground on gold 4.96); `npx vitest run test/smoke.test.ts test/contrast.test.ts` 6/6 pass.
 - Open: /dev/ui not rendered in a browser (dev server not required by task); font download through next/font not exercised (first happens at next dev/build). Sign-in page not restyled yet.
 
-## 0.9 GATE + Phase 2 detail check - done 2026-10-19
-- Results: `npm run typecheck` pass; `npx eslint src test scripts` clean; `npx vitest run` 10 files, 55/55 pass (5.2s); `next build` pass (Next 16.4.2 Turbopack): / static, /sign-in partial prerender, /api/auth dynamic, /dev/outbox prerendered as notFound in production (guard checked).
-- Playwright not run: `test/e2e/` has no specs yet; first smoke is in 1.9.
-- No fixes needed. Follow-ups put into PLAN.md: sign-in honeypot/formToken -> 1.8; assignments in AuthContext, staff 12h re-auth, server-action rate-limit test -> Phase 2 outline; CSP headers, FIELD_ENC_OLD_KEYS, npm audit review -> Phase 8 outline.
-- Phase 2 outline still fits Phase 0 (scoped repos, field crypto, audit, rate limit, email outbox all in place). Detailed Phase 2 tasks still written in 1.9.
-- Files: docs/PLAN.md, docs/progress.md.
-
+- 0.9 GATE + Phase 2 detail check - done 2026-10-19: typecheck/eslint/55 tests/`next build` pass; Playwright deferred to 1.9; follow-ups added to PLAN.md.
 - 0.8 Rate limit + public-form guard - done 2026-10-19: fixed-window `checkRateLimit` (HMAC keys, TTL), `guardPublicForm` (honeypot, signed formToken, Origin); sign-in rate-limited. Sign-in honeypot/token and CSP still open.
 - 0.7c Sign-in + outbox pages - done 2026-10-19: `/sign-in` magic-link form + server action, check-email page, dev-only `/dev/outbox`, "not configured" state.
 - 0.7b Auth.js core - done 2026-10-19: Mongo adapter, DB sessions, email magic link, `user_roles` -> session roles, `getAuthContext()`.

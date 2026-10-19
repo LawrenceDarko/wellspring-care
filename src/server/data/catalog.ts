@@ -18,7 +18,10 @@ export type PublicService = {
   eligibility?: string;
   intakeFormKey: string;
   category: { slug: string; name: string };
+  /** Lowest active package price; absent when the service has no active package. */
+  startingPrice?: Money;
 };
+export type Money = { cents: number; currency: string };
 export type PublicPackage = {
   id: string;
   slug: string;
@@ -35,6 +38,13 @@ export type PublicPackage = {
   installmentsAllowed: boolean;
 };
 export type PublicServiceDetail = PublicService & { packages: PublicPackage[] };
+
+/** Cheapest of the given packages (prices are per package, in its own currency). */
+export function startingPrice(packages: { priceCents: number; currency: string }[]): Money | undefined {
+  let min: Money | undefined;
+  for (const p of packages) if (!min || p.priceCents < min.cents) min = { cents: p.priceCents, currency: p.currency };
+  return min;
+}
 
 const byOrder = { order: 1, name: 1 } as const;
 
@@ -78,10 +88,21 @@ export async function listServices(opts: { categorySlug?: string } = {}, db?: Db
     .find({ active: true, categoryId: { $in: cats.map((c) => c._id) } })
     .sort(byOrder)
     .toArray();
+  const packages = await database
+    .collection<ServicePackage>("service_packages")
+    .find(
+      { active: true, serviceId: { $in: services.map((s) => s._id) } },
+      { projection: { serviceId: 1, priceCents: 1, currency: 1 } },
+    )
+    .toArray();
+  const pkgsByService = Map.groupBy(packages, (p) => p.serviceId.toHexString());
   const catOrder = new Map(cats.map((c, i) => [c._id.toHexString(), i]));
   return services
     .sort((a, b) => catOrder.get(a.categoryId.toHexString())! - catOrder.get(b.categoryId.toHexString())!)
-    .map((s) => toPublicService(s, catById.get(s.categoryId.toHexString())!));
+    .map((s) => {
+      const from = startingPrice(pkgsByService.get(s._id.toHexString()) ?? []);
+      return { ...toPublicService(s, catById.get(s.categoryId.toHexString())!), ...(from ? { startingPrice: from } : {}) };
+    });
 }
 
 /** One active service with its active packages; null when missing or inactive. */
@@ -98,8 +119,10 @@ export async function getServiceBySlug(slug: string, db?: Db): Promise<PublicSer
     .find({ serviceId: service._id, active: true })
     .sort(byOrder)
     .toArray();
+  const from = startingPrice(packages);
   return {
     ...toPublicService(service, category),
+    ...(from ? { startingPrice: from } : {}),
     packages: packages.map((p) => ({
       id: p._id.toHexString(),
       slug: p.slug,

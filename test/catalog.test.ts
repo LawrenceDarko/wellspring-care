@@ -106,4 +106,20 @@ describe("public catalog read", () => {
     expect(family.every((s) => s.category.slug === "marriage-and-family")).toBe(true);
     expect(family).toHaveLength(5);
   });
+
+  it("reports the lowest active package price as the starting price", async () => {
+    await seedCatalog(mongo.db);
+    const premarital = await mongo.db.collection("services").findOne({ slug: "premarital" });
+    const pkgs = mongo.db.collection("service_packages");
+    await pkgs.updateOne({ serviceId: premarital!._id, slug: "6-sessions" }, { $set: { active: true, priceCents: 9000 } });
+    await pkgs.updateOne({ serviceId: premarital!._id, slug: "8-sessions" }, { $set: { active: true, priceCents: 7000 } });
+    // Cheaper but inactive: must not count.
+    await pkgs.updateOne({ serviceId: premarital!._id, slug: "4-sessions" }, { $set: { priceCents: 100 } });
+
+    const listed = (await listServices({}, mongo.db)).find((s) => s.slug === "premarital");
+    expect(listed?.startingPrice).toEqual({ cents: 7000, currency: "USD" });
+    expect((await getServiceBySlug("premarital", mongo.db))?.startingPrice).toEqual({ cents: 7000, currency: "USD" });
+    const other = (await listServices({}, mongo.db)).find((s) => s.slug === "faith-questions");
+    expect(other).not.toHaveProperty("startingPrice");
+  });
 });
