@@ -1,8 +1,16 @@
 # Progress
 
-Current task: 1.9 GATE + write Phase 2 tasks
+Current task: 2.1 Intake data layer
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.9 GATE + write Phase 2 tasks - done 2026-10-19
+- Done: GATE on the ADR 006 UI. First Playwright spec `test/e2e/smoke.spec.ts`: home -> "Request spiritual care" -> /services -> first service detail -> /contact submit (waits 3.5s for the form guard), at 360 and 1280 px, asserting no horizontal scroll on each page.
+- E2E is hermetic: `test/e2e/server.ts` starts MongoMemoryReplSet, `ensureCollections`, `seedCatalog({activatePackages})`, then `next dev --port 3100` with throwaway AUTH_SECRET/FIELD_ENC_KEY, Resend blanked (dev outbox). `distDir` via `E2E_DIST_DIR` (`.next-e2e`) because Next 16 allows one `next dev` per dir (user's :3000 server was running). Config: one chromium project, `reuseExistingServer: false`. tsconfig gains `.next-e2e` type globs (Next adds them otherwise).
+- PLAN.md: Phase 2 tasks 2.1-2.10 written (outline line removed).
+- Files: test/e2e/{server,smoke.spec}.ts, playwright.config.ts, next.config.ts, tsconfig.json, .gitignore, docs.
+- Tests: typecheck pass; `npx eslint src test scripts` clean; `npx vitest run` 134/134 (22 files); `next build` ok (23 routes, built without env so home/settings use defaults); `npm run test:e2e` 2/2 pass (run twice). Playwright chromium-headless-shell 1248 downloaded (pinned 1.64.1 needed it).
+- Open: smoke covers only one service and Chromium; no 768 px check; IDOR suite has no Phase 2 repos yet. 1.9b-e "not rendered" items now covered only by the no-scroll check, not visual review. New capability `requests:triage` (2.7) is not in PRD §2: confirm with the org.
 
 ## 1.9e Content, legal, contact, sign-in restyle - done 2026-10-19
 - Done: `ContentPage` is a book page (max-w-6xl grid, article at `max-w-measure`, first `p` after h1 is `text-lede`, optional `note` in a 15rem margin column, first in DOM so it reads first on mobile). `contentComponents`: h1/h2/h3 on the type scale, h2 opens with a gold hairline, gold list markers. `TodoOrg` no all-caps. `LegalPage` puts `DraftBanner` (same text + role/label) in the margin note.
@@ -33,13 +41,7 @@ Current task: 1.9 GATE + write Phase 2 tasks
 - Tests: typecheck pass; eslint clean; `npx vitest run test/site-shell.test.tsx test/contrast.test.ts test/home.test.tsx test/content-pages.test.tsx` 21/21 pass (skip link first focusable; new: footer has `band` + every footer link has `focus-visible:outline-2 outline-ring`; nav/menu 44px). `check:contrast` 28/28; `check:copy` ok.
 - Open: not rendered (class-level checks only; real focus visibility + 360/1280 layout in 1.9 GATE Playwright). No `aria-current` on nav (header is a server component). Sign-in link not in header yet.
 
-## 1.9a Design direction - done 2026-10-19
-- Done: ADR 006 (life-seasons path as the one signature device, refined PRD palette, book-page layout, 8 UI rules) from `.claude/skills/frontend-design` (installed from anthropics/skills). Tokens: linen bg `#f6f5ef`, charcoal `#262624`, moss secondary, pale-moss accent (gold now rules/markers only), new `band`/`band-foreground`/`band-muted`/`band-gold`. Type scale in `@theme` (`text-body` 17px/1.65, `text-lede`, `text-h3..h1`, fluid `text-display`), `max-w-measure` 65ch, `type-display` + `band` utilities (band swaps focus ring to linen). Body defaults to `text-body`; headings `text-wrap: balance`.
-- PLAN.md: tasks 1.9b-e added before 1.9 GATE. ADR README lists 006 (003 stays reserved for installments).
-- Files: src/app/globals.css, scripts/check-contrast.ts, src/app/dev/ui/page.tsx, docs/adr/{006-design-direction.md,README.md}, docs/{PLAN,progress,MAP}.md, .claude/skills/frontend-design/.
-- Tests: typecheck pass; eslint clean; `check:contrast` 28/28; `npx vitest run test/contrast.test.ts test/site-shell.test.tsx test/home.test.tsx` 14/14 pass.
-- Open: CLAUDE.md is read-only on disk, so the "UI design" rule is in MAP.md, not CLAUDE.md (user to add). Not rendered in dev server (new tokens shift all pages slightly; checked in 1.9 GATE). Existing pages still use old card-grid layouts until 1.9b-e.
-
+- 1.9a Design direction - done 2026-10-19: ADR 006 (life-seasons path, refined palette, book-page layout, 8 UI rules), linen/charcoal/moss tokens + `band*`, type scale + `max-w-measure`, PLAN tasks 1.9b-e.
 - 1.8 Contact + general inquiry - done 2026-10-19: `/contact` RHF form -> `submitContactForm` (guard, validate, IP+email rate limit, `contact_messages`, generic receipt email); `FormGuardFields` on sign-in. Contact submit must wait >3s.
 - 1.7 Legal + scope pages - done 2026-10-19: six legal MDX drafts at `/legal/<slug>` in `LegalPage` + `DraftBanner`, org facts as `TodoOrg`, `npm run check:copy` (PRD §15.3 banned phrases, emergency notice required).
 - 1.6 Content pages - done 2026-10-19: MDX via `@next/mdx`, six pages in `ContentPage`, `TodoOrg` pending blocks (hidden in production), `contentComponents`.

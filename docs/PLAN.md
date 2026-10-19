@@ -82,9 +82,40 @@ Markers: `RESEARCH` = web lookups allowed (cap 5). `GATE` = full suite, `next bu
 - **1.9 GATE + write Phase 2 tasks** - Full suite, `next build`, Playwright smoke (home -> services -> detail -> contact submit) at 360 and 1280 px, on the ADR 006 UI. Then write Phase 2 tasks into this file.
   Accept: results recorded; Phase 2 tasks present.
 
+## Phase 2 - Intake engine
+
+- **2.1 Intake data layer** - PRD §3.2 (Intake), §5.1, §13.1. Zod schemas + validators for `intake_forms` (key, version, fields; `sensitive` literal false, free text maxLength <= 500), `service_requests` (requester userId or `pendingClaim`, service, package?, answers, status, assignedProviderIds, history[]), `referrals`, `consent_records`; registry indexes. Files: `src/server/data/schemas/intake.ts`, `registry.ts`, test.
+  Accept: ensure idempotent; validator rejects `sensitive: true`, maxLength > 500, unknown status.
+
+- **2.2 Status machine** - PRD §5.6. `src/domain/status.ts`: statuses, `canTransition`, `transition(request, to, actor, now)` returning the new status + history entry; `cancelled`/`referred` from any non-terminal; terminal set. Pure, no DB.
+  Accept: table test of every allowed and a sample of rejected transitions; history entry shape.
+
+- **2.3 Forms-as-data renderer** - PRD §5.1, §5.3, §5.4, §15.1. `src/domain/intake-form.ts` (definition -> zod schema, 500-char cap, required/options) + `src/components/intake/intake-form-fields.tsx` (RHF fields, helper text "Please share only what you're comfortable with...", labelled inputs, error links). Seed intake forms: general, hospice (relationship, setting, preferred support, clinical-team notice), family/couples (participants, who is the client, confidentiality summary); map every seeded service to a form key.
+  Accept: schema-from-definition tests (caps, required, options); render test (labels, helper, errors via aria-describedby); seed idempotent.
+
+- **2.4 Service request create** - PRD §5.7, §13.5, §14, §15.3. `/request/[slug]` page (ADR 006 book page, emergency notice, scope note), server action: guard + rate limit, validate against the form version, scope/privacy consent record, insert `submitted` with history, generic `inquiry_received` email. Signed-in -> requester = user; anonymous -> email + hashed claim token (TTL) and claim link email. Repo `src/server/data/service-requests.ts` (`createServiceRequest`). Fixes the `/request/<slug>` 404.
+  Accept: action tests (valid signed-in, valid anon, honeypot, rate limit, invalid answers); stored doc has no extra keys; email subject/body generic.
+
+- **2.5 Claim anonymous request** - PRD §5.7, §13.2. `/request/claim` route: requires sign-in with the same email, verifies hashed token (single use, expiry), sets requester, audit `request.claimed`. Nothing sensitive in the URL beyond the opaque token.
+  Accept: tests for valid claim, wrong email, reused token, expired token.
+
+- **2.6 Client portal: requests** - PRD §11, §13.1. `(portal)` layout (`requireUser`, sign-in link in site header), `/portal/requests` list + `/portal/requests/[id]` detail (status, history in plain words, service), owner-scoped repo methods `listMyRequests`, `getMyRequest`.
+  Accept: IDOR test (other user's id -> null/404); render tests for list + detail.
+
+- **2.7 Staff inbox + assignment** - PRD §2, §12.2, §13.1, §13.2. Capability `requests:triage` (super_admin; record in capability map), `(staff)` layout with `requireCapability` + 12h re-auth check, `/staff/requests` inbox (filter by status, no answers in list), detail, assign provider (`care:provide` holders), audit `request.assigned`. Chaplain sees only assigned (`assignedScope`).
+  Accept: authz tests (triage sees all, chaplain only assigned, client 403); assignment audit written.
+
+- **2.8 Staff transitions + referral** - PRD §5.5, §5.6. Server actions applying `src/domain/status.ts` (409 on invalid), history + audit, status email (generic); "Referred to another provider" with `referrals` record (category, optional provider name, note <= 200 chars).
+  Accept: transition tests (valid, invalid, unassigned chaplain 403); referral note cap; client view shows new status.
+
+- **2.9 Prayer requests** - PRD §10, §3.2 (Content), §13.3. `prayer_requests` schema (encrypted text with aad, private default, follow-up preference), form on `/prayer` (guard, rate limit, anonymous allowed), `prayer_team` view decrypting only with `prayer:read_assigned`; public-sharing consent recorded separately, never displayed (MVP).
+  Accept: stored doc has no plaintext; non-prayer roles (incl. client, chaplain) cannot read; encryption aad bound to doc id.
+
+- **2.10 GATE + write Phase 3 tasks** - Full suite incl. IDOR suite over every Phase 2 repository, `next build`, Playwright at 360 and 1280: anonymous request -> claim -> portal shows status; staff assigns + transitions; prayer submit. Then write Phase 3 tasks into this file.
+  Accept: results recorded; Phase 3 tasks present.
+
 ## Later phases (outline; detailed at the end of the previous phase)
 
-- **Phase 2 - Intake engine** (PRD §5, §10 prayer form, §11 requests): forms-as-data renderer, service request create (anon + claim), status machine, staff inbox, assignment, referral, prayer requests (encrypted), consent records, client request views. GATE incl. IDOR suite.
 - **Phase 3 - Renewal program** (PRD §6): programs/tracks/cohorts/lessons, curriculum seed from `docs/content/renewal-curriculum.md`, enrollment wizard (payment stubbed to pending), participant portal, reflections, facilitator portal, attendance, certificate PDF.
 - **Phase 4 - Scheduling** (PRD §7): availability, slot engine with DST tests, booking, cancellation policy, reminders cron, check-ins from enrollments.
 - **Phase 5 - Payments** (PRD §8): Stripe Checkout, webhook + idempotency, quotes, invoices, deposits, installments, scholarships, memberships, dev mode. MVP milestone: acceptance criteria 1-5 and 8-11 demonstrable.

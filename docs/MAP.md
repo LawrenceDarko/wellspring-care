@@ -8,7 +8,7 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `tsconfig.json` - strict, `@/*` -> `src/*`, `allowImportingTsExtensions` (scripts run via Node type stripping).
 - `eslint.config.mjs` - flat config, next core-web-vitals + typescript.
 - `vitest.config.ts` - node env; includes `test/**/*.test.{ts,tsx}`, `src/**/*.test.{ts,tsx}`; excludes `test/e2e`; `@` alias; `server-only`, `next/font/google` -> stubs; inlines next-auth.
-- `playwright.config.ts` - testDir `test/e2e`, chromium + mobile, webServer `npm run dev` (GATE only).
+- `playwright.config.ts` - testDir `test/e2e`, chromium only (widths set per test), webServer `node test/e2e/server.ts` on :3100 (GATE only). `next.config.ts` `distDir` honours `E2E_DIST_DIR`.
 - `.env.example` - every env var with comments (PRD §17).
 
 ## src/
@@ -57,4 +57,4 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `test/helpers/mongo.ts` - `startMongo()` -> `{ uri, client, db, stop }` on MongoMemoryReplSet. `test/helpers/server-only.ts`, `test/helpers/next-font.ts` - stubs vitest aliases `server-only` / `next/font/google` to.
 - `test/contrast.test.ts` - token contrast pairs, light only, solid focus ring in ui components.
 - `test/catalog.test.ts` (seed idempotent, inactive hidden), `test/content.test.ts` (events, testimonial consent), `test/home.test.tsx` (CTAs, empty sections hidden), `test/services.test.tsx` (directory/detail render, slug param), `test/settings.test.ts`, `test/content-pages.test.tsx` (TodoOrg dev/prod, MDX map), `test/legal-pages.test.tsx` (draft banner, routes, copy-check), `test/contact.test.ts` (submission guard/limits/stored keys), `test/form-guard.test.tsx`, `test/site-shell.test.tsx` - settings defaults/merge; shell keyboard + footer (jsdom + Testing Library, `// @vitest-environment jsdom`).
-- `test/e2e/` - Playwright specs (empty).
+- `test/e2e/server.ts` - hermetic e2e server (memory replset, ensure, seed with active packages, `next dev` in `.next-e2e`, throwaway secrets). `test/e2e/smoke.spec.ts` - home -> services -> detail -> contact at 360/1280, no horizontal scroll.
