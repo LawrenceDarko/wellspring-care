@@ -1,8 +1,15 @@
 # Progress
 
-Current task: 0.3 Env + config
+Current task: 0.4 Mongo client + ensure script
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 0.3 Env + config - done 2026-10-19
+- Done: `src/server/config.ts` (`import "server-only"`): zod schema for every `.env.example` key; "" treated as unset; required MONGODB_URI (mongodb[+srv]://), AUTH_SECRET (>=32 chars), FIELD_ENC_KEY (base64, 32 bytes); defaults APP_URL/MONGODB_DB/FIELD_ENC_KID. `parseConfig(env)` pure, `getConfig()` cached from process.env. `integrations.{stripe,email,googleCalendar}` true only when all their keys set. `ConfigError` lists key names only, never values.
+- Vitest aliases `server-only` to `test/helpers/server-only.ts` (real package throws outside RSC builds).
+- Files: src/server/config.ts, test/config.test.ts, test/helpers/server-only.ts, vitest.config.ts, docs/MAP.md, docs/progress.md.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/config.test.ts test/smoke.test.ts` 8/8 pass.
+- Open: config not yet called at boot (first consumer: 0.4 `getDb()`). Stripe needs all 3 keys incl. publishable to count as configured.
 
 ## 0.2 RESEARCH Pin versions - done 2026-10-19
 - Done: versions from npm registry (dist-tags + peers), all pinned exact; `docs/adr/001-versions.md` written. Installed zod, RHF, resolvers, mongodb, next-auth v5 beta, adapter, stripe, resend, react-email, date-fns(+tz), lucide-react, server-only; dev shadcn, mongodb-memory-server. react 19.3.0 -> 19.3.1.
