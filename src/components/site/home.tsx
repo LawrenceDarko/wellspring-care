@@ -1,11 +1,12 @@
+import Image from "next/image";
 import Link from "next/link";
-import { Landscape } from "@/components/art";
-import { Reveal } from "@/components/motion";
+import { Parallax, Reveal } from "@/components/motion";
+import { MEDIA } from "@/content/media";
 import { groupBySeason } from "@/domain/seasons";
 import type { PublicCategory } from "@/server/data/catalog";
 import type { PublicEvent, PublicTestimonial } from "@/server/data/content";
 import type { SiteSettings } from "@/server/data/settings";
-import { HomeHero, SeasonsChapter, type ChapterSeason } from "./home-story";
+import { HeroWords, HomeHero, SeasonsChapter, type ChapterSeason } from "./home-story";
 
 // Home page (PRD §4.3) as the ADR 007 scroll story: the spring at dawn (pinned hero), downstream
 // through the five seasons (forest chapter), the remaining sections as quiet book pages with
@@ -114,13 +115,13 @@ export function HomeSections({ settings, categories, events, testimonials }: Hom
       <HomeHero labelledBy="home-hero">
         <div className="flex max-w-3xl flex-col gap-6">
           <h1 id="home-hero" className="type-display break-words">
-            {settings.tagline ?? settings.name}
+            <HeroWords text={settings.tagline ?? settings.name} />
           </h1>
-          <p className="max-w-measure text-lede">
+          <p data-hero-rise className="max-w-measure text-lede">
             {settings.name} offers Christian chaplaincy, pastoral and spiritual care, renewal programs, and
             ceremonies for weddings, funerals and memorials.
           </p>
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div data-hero-rise className="flex flex-col gap-3 sm:flex-row">
             <Link href="/services" className={`${cta} bg-primary text-primary-foreground hover:bg-primary/90`}>
               Request spiritual care
             </Link>
@@ -131,7 +132,7 @@ export function HomeSections({ settings, categories, events, testimonials }: Hom
               Explore programs
             </Link>
           </div>
-          <p className="max-w-measure text-[0.9375rem]">
+          <p data-hero-rise className="max-w-measure text-[0.9375rem]">
             Pastoral and spiritual care only. We are not a medical, mental-health or emergency provider.
           </p>
         </div>
@@ -246,7 +247,13 @@ export function HomeSections({ settings, categories, events, testimonials }: Hom
       </div>
 
       <section aria-labelledby="home-still-pool" className="band">
-        <Landscape parallax className="h-40 md:h-64" />
+        {/* The still pool: the photo drifts slower than the page and fades into the band. */}
+        <div aria-hidden="true" className="relative h-56 overflow-hidden md:h-[26rem]">
+          <Parallax speed={0.18} className="absolute inset-x-0 -inset-y-[22%]">
+            <Image src={MEDIA.stillLake.src} alt="" fill sizes="100vw" className="object-cover" />
+          </Parallax>
+          <div className="absolute inset-0 bg-linear-to-b from-band/40 via-transparent to-band" />
+        </div>
         <Reveal className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-14 md:px-6 md:py-20">
           <h2 id="home-still-pool" className="text-h2 font-medium">
             When you are ready, ask for care

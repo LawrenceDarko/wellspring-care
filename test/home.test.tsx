@@ -14,6 +14,7 @@ vi.hoisted(() => {
 });
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { MEDIA, SEASON_MEDIA } from "@/content/media";
 import { SEASONS } from "@/domain/seasons";
 import { HomeSections, type HomeData } from "@/components/site/home";
 import { SETTINGS_DEFAULTS } from "@/server/data/settings";
@@ -50,8 +51,10 @@ describe("home page", () => {
       const link = within(items[i]).getByRole("link", { name: season.name });
       expect(link.getAttribute("href")).toBe(season.href);
       expect(items[i].textContent).toContain(season.line);
-      // Each scene carries its own vignette inline (no JS needed to see it).
-      expect(items[i].querySelector('[aria-hidden="true"] svg')).toBeTruthy();
+      // Each scene carries its own season photo inline (no JS needed to see it), decorative here.
+      const img = items[i].querySelector('[aria-hidden="true"] img');
+      expect(img?.getAttribute("src")).toContain(encodeURIComponent(MEDIA[SEASON_MEDIA[season.key]].src));
+      expect(img?.getAttribute("alt")).toBe("");
     });
     // Markers are decorative; the list itself carries the order.
     expect(items[0].querySelector('[aria-hidden="true"]')?.textContent).toBe("1");
@@ -80,7 +83,7 @@ describe("home page", () => {
       "Our mission and values",
       "When you are ready, ask for care",
     ]) {
-      expect(html, text).toContain(text);
+      expect(html.replace(/<[^>]+>/g, ""), text).toContain(text);
     }
     // SVG art uses stop-opacity and transform attributes; content must have no inline from-state.
     expect(html).not.toMatch(/(?<![-\w])opacity:\s*0(?![.\d])|visibility:\s*hidden|style="[^"]*(transform|translate)/);

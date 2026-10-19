@@ -4,6 +4,8 @@
 // Subjects are landscapes, hands, candles and chapels; people only as hands or from
 // behind. Never place one beside a quote or caption that implies a client.
 
+import type { SeasonKey } from "@/domain/seasons";
+
 export type MediaKey =
   | "riverDawn"
   | "weddingHands"
@@ -135,3 +137,12 @@ export const MEDIA = {
 } as const satisfies Record<MediaKey, Media>;
 
 export const MEDIA_LIST: readonly Media[] = Object.values(MEDIA);
+
+/** The photo for each life season (home seasons chapter, 1.11). */
+export const SEASON_MEDIA = {
+  marriage: "weddingHands",
+  family: "familyPath",
+  renewal: "forestPath",
+  illness: "heldHands",
+  loss: "candle",
+} as const satisfies Record<SeasonKey, MediaKey>;

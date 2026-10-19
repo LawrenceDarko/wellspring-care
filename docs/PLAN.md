@@ -111,6 +111,9 @@ Markers: `RESEARCH` = web lookups allowed (cap 5). `GATE` = full suite, `next bu
 - **1.10 GATE** - Full suite, `next build`, Playwright at 360/1280 (existing smoke + header menus by keyboard + a `reducedMotion: 'reduce'` run asserting all home text visible), no horizontal scroll, first-load JS for `/` recorded.
   Accept: results recorded; Phase 2 resumes at 2.1.
 
+- **1.11 Home motion + season photos** (user request 2026-10-19) - richer hero motion (intro, pointer depth, scrub), season vignettes -> season photos with a scrubbed photo stage, still-pool photo. Files: `home-story.tsx`, `home.tsx`, `media.ts`, home test.
+  Accept: home tests updated; story + smoke e2e pass; all text opacity 1 after scroll; reduced motion static.
+
 ## Phase 2 - Intake engine
 
 - **2.1 Intake data layer** - PRD §3.2 (Intake), §5.1, §13.1. Zod schemas + validators for `intake_forms` (key, version, fields; `sensitive` literal false, free text maxLength <= 500), `service_requests` (requester userId or `pendingClaim`, service, package?, answers, status, assignedProviderIds, history[]), `referrals`, `consent_records`; registry indexes. Files: `src/server/data/schemas/intake.ts`, `registry.ts`, test.
