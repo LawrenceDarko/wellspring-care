@@ -23,8 +23,14 @@ Markers: `RESEARCH` = web lookups allowed (cap 5). `GATE` = full suite, `next bu
 - **0.6 Field encryption + audit + logger** - PRD §13.3, §13.6. `src/server/crypto/field.ts` (encrypt/decrypt, kid), `src/server/audit.ts`, `src/server/log.ts` with allowlist. Tests: round trip, tamper fails, wrong kid fails, stored doc has no plaintext, logger drops non-allowlisted keys.
   Accept: tests pass.
 
-- **0.7 Auth.js wiring** - PRD §13.2, §14. Auth.js with MongoDB adapter, DB sessions, email provider using dev transport (`email_outbox`) when Resend absent, session callback attaches roles. Minimal `/sign-in` page and `/dev/outbox` (dev only, 404 in prod).
-  Accept: integration test creates verification token and outbox entry; typecheck passes. Dev server check: sign-in page renders (start, curl, kill).
+- **0.7a Email transport** - PRD §14. `email_outbox` schema + validator + registry (TTL), outbox repository, `sendEmail()`: Resend when configured, dev transport (`email_outbox`) otherwise, visible "not configured" error in production without Resend.
+  Accept: tests for outbox write, transport selection, production refusal; typecheck passes.
+
+- **0.7b Auth.js core** - PRD §13.2. Auth.js with MongoDB adapter, DB sessions, email provider sending through `sendEmail()`, session callback attaches roles (`user_roles` read), `getAuthContext()`, `/api/auth/[...nextauth]` route.
+  Accept: integration test creates verification token and outbox entry; typecheck passes.
+
+- **0.7c Sign-in + outbox pages** - PRD §13.2, §14. Minimal `/sign-in` page and `/dev/outbox` (dev only, 404 in prod).
+  Accept: typecheck passes. Dev server check: sign-in page renders (start, curl, kill).
 
 - **0.8 Rate limit + public-form guard** - PRD §13.5. `src/server/rate-limit.ts` (fixed window, TTL), `guardPublicForm()` (honeypot, min fill time, origin check). Tests for limit, reset, honeypot reject.
   Accept: tests pass.

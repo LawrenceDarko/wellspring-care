@@ -1,6 +1,7 @@
 import type { Db, Document, IndexDescription } from "mongodb";
 import {
   auditLogValidator,
+  emailOutboxValidator,
   organizationSettingsValidator,
   rateLimitValidator,
 } from "./schemas/system.ts";
@@ -35,6 +36,14 @@ export const collections: CollectionSpec[] = [
     validator: rateLimitValidator,
     indexes: [
       { key: { key: 1, windowStart: 1 }, name: "key_window_unique", unique: true },
+      { key: { expiresAt: 1 }, name: "expiresAt_ttl", expireAfterSeconds: 0 },
+    ],
+  },
+  {
+    name: "email_outbox",
+    validator: emailOutboxValidator,
+    indexes: [
+      { key: { createdAt: -1 }, name: "createdAt_desc" },
       { key: { expiresAt: 1 }, name: "expiresAt_ttl", expireAfterSeconds: 0 },
     ],
   },

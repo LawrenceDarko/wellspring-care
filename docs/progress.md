@@ -1,8 +1,15 @@
 # Progress
 
-Current task: 0.7 Auth.js wiring
+Current task: 0.7b Auth.js core
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 0.7a Email transport - done 2026-10-19
+- Split: 0.7 was ~10 files, split (user approved) into 0.7a email transport, 0.7b Auth.js core, 0.7c sign-in + /dev/outbox pages (PLAN.md updated).
+- Done: `email_outbox` zod + `$jsonSchema` in schemas/system.ts (`EMAIL_TEMPLATES` = PRD §14 list, `OUTBOX_TTL_MS` 7 days), registry entry (createdAt_desc, expiresAt TTL). `src/server/data/email-outbox.ts`: `insertOutboxEmail`, `listOutboxEmails` (system-level, no AuthContext, dev only). `src/server/email/index.ts`: `selectTransport(config)` = Resend if configured, outbox outside production, else null; `sendEmail(msg, transport?)` throws `EmailNotConfiguredError` when null; `emailAvailable()`; `EmailSendError` carries no content.
+- Files: src/server/data/{schemas/system,registry,email-outbox}.ts, src/server/email/index.ts (removed .gitkeep), test/email.test.ts, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/email.test.ts test/db-ensure.test.ts` 10/10 pass (selection x3 incl. production refusal, outbox write + TTL index, newest first, app + DB validators reject bad template/recipient).
+- Open: Resend transport not exercised against the real API (no key). No React Email templates yet; callers pass text/html. Outbox bodies hold sign-in links in dev: only /dev/outbox (0.7c) may read them.
 
 ## 0.6 Field encryption + audit + logger - done 2026-10-19
 - Done: `src/server/crypto/field.ts` (server-only): AES-256-GCM, 12-byte random IV, 16-byte tag, stored `{v:1,kid,iv,tag,ct}`. `createKeyring(currentKid, {kid: b64})` (multi-key for rotation), `getKeyring()` from FIELD_ENC_KEY/KID, `encryptField(pt, aad?, ring?)`, `decryptField(f, aad?, ring?)`, `needsRotation`. Optional `aad` binds ciphertext to record (e.g. `pastoral_notes.body:<id>`). `FieldCryptoError` messages never carry data.
@@ -33,11 +40,5 @@ Current task: 0.7 Auth.js wiring
 - Tests: typecheck pass; eslint clean; `npx vitest run test/config.test.ts test/smoke.test.ts` 8/8 pass.
 - Open: config not yet called at boot (first consumer: 0.4 `getDb()`). Stripe needs all 3 keys incl. publishable to count as configured.
 
-## 0.2 RESEARCH Pin versions - done 2026-10-19
-- Done: versions from npm registry (dist-tags + peers), all pinned exact; `docs/adr/001-versions.md` written. Installed zod, RHF, resolvers, mongodb, next-auth v5 beta, adapter, stripe, resend, react-email, date-fns(+tz), lucide-react, server-only; dev shadcn, mongodb-memory-server. react 19.3.0 -> 19.3.1.
-- Deviations: mongodb 6.21.0 not 7.7.0 (adapter peers ^6). `react-email@6.11.3` replaces deprecated `@react-email/components` (PLAN named the old package). TS 5.9.3 / ESLint 9.39.5 held (TS 7, ESLint 10 out).
-- Files: package.json, package-lock.json, docs/adr/001-versions.md, docs/MAP.md, docs/progress.md.
-- Tests: `npm ls` no peer errors; typecheck pass; eslint clean; `npx vitest run test/smoke.test.ts` 1/1 pass; `npm audit --omit=dev` 0.
-- Open: Auth.js v5 still beta, maintenance-only (risk in ADR). 9 high dev-only audit warnings. mongodb-memory-server postinstall blocked: binary downloads on first use (0.4).
-
+- 0.2 RESEARCH Pin versions - done 2026-10-19: all deps pinned exact in ADR 001; mongodb 6.21 (adapter peer), react-email 6.11.3, TS 5.9/ESLint 9 held; Auth.js v5 beta risk noted.
 - 0.1 Scaffold - done 2026-10-19: Next 16.4.2 + React 19 scaffold, Vitest/Playwright configs, folder layout, `.env.example`; AGENTS.md not added; npm audit warnings unreviewed.

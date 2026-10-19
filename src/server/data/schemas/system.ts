@@ -110,3 +110,60 @@ export const rateLimitValidator: Document = {
     additionalProperties: false,
   },
 };
+
+// --- email_outbox (PRD §14, dev transport only) ------------------------------
+// Written only when Resend is not configured outside production. Bodies may hold
+// sign-in links, so docs expire via TTL and are viewable only at /dev/outbox.
+
+export const EMAIL_TEMPLATES = [
+  "verification",
+  "magic_link",
+  "inquiry_received",
+  "consultation_booked",
+  "reminder",
+  "cancellation",
+  "enrollment_confirmed",
+  "lesson_released",
+  "receipt",
+  "payment_failed",
+  "quote_ready",
+  "wedding_confirmed",
+  "funeral_confirmed",
+  "event_registration",
+  "renewal_notice",
+  "scholarship_decision",
+  "follow_up_invitation",
+] as const;
+export type EmailTemplate = (typeof EMAIL_TEMPLATES)[number];
+
+export const OUTBOX_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+export const emailOutboxSchema = z.object({
+  _id: z.instanceof(ObjectId).optional(),
+  to: z.email().max(320),
+  subject: z.string().min(1).max(200),
+  text: z.string().min(1).max(20_000),
+  html: z.string().max(200_000).optional(),
+  template: z.enum(EMAIL_TEMPLATES),
+  expiresAt: z.date(),
+  ...timestamps,
+});
+export type EmailOutboxEntry = z.infer<typeof emailOutboxSchema>;
+
+export const emailOutboxValidator: Document = {
+  $jsonSchema: {
+    bsonType: "object",
+    required: ["to", "subject", "text", "template", "expiresAt", "createdAt", "updatedAt"],
+    properties: {
+      _id: { bsonType: "objectId" },
+      to: { bsonType: "string", minLength: 3, maxLength: 320 },
+      subject: { bsonType: "string", minLength: 1, maxLength: 200 },
+      text: { bsonType: "string", minLength: 1, maxLength: 20000 },
+      html: { bsonType: "string", maxLength: 200000 },
+      template: { enum: [...EMAIL_TEMPLATES] },
+      expiresAt: { bsonType: "date" },
+      ...timestampProps,
+    },
+    additionalProperties: false,
+  },
+};
