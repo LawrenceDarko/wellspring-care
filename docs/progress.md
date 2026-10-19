@@ -1,8 +1,17 @@
 # Progress
 
-Current task: 1.1 Design tokens + fonts
+Current task: 1.2 Site shell
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.1 Design tokens + fonts - done 2026-10-19
+- Done: brand tokens (hex, light only) in `globals.css` :root, mapped via `@theme inline` (+ `gold`, `font-sans`, `font-display`); h1-h3 use display font; global `prefers-reduced-motion` rule. Fonts Fraunces + Source Sans 3 via `next/font/google` (`src/app/fonts.ts`, ADR 002). shadcn init (radix, new-york) + button, card, input, label, textarea, select, dialog, badge, sheet. `/dev/ui` preview page (404 in production).
+- New deps from shadcn, pinned exact and recorded in ADR 002: radix-ui 1.8.1, class-variance-authority 0.7.1, cn 0.5.0 (shadcn's clsx+tailwind-merge replacement), tw-animate-css 1.4.0 (dev).
+- Focus ring: shadcn `ring-ring/50` measured ~2.5:1 on ivory, changed to solid `ring-ring` in 5 components + base `outline-ring`.
+- `scripts/check-contrast.ts` (`npm run check:contrast`): 25 token pairs, text >= 4.5, UI >= 3. Vitest aliases `next/font/google` to `test/helpers/next-font.ts`.
+- Files: src/app/{globals.css,layout.tsx,fonts.ts,dev/ui/page.tsx}, src/components/ui/*, src/lib/utils.ts, components.json, scripts/check-contrast.ts, test/{contrast.test.ts,helpers/next-font.ts}, vitest.config.ts, package.json, docs/adr/002-fonts.md.
+- Tests: typecheck pass; eslint clean on touched files; `npm run check:contrast` 25/25 pass (lowest: input border 3.58, gold-foreground on gold 4.96); `npx vitest run test/smoke.test.ts test/contrast.test.ts` 6/6 pass.
+- Open: /dev/ui not rendered in a browser (dev server not required by task); font download through next/font not exercised (first happens at next dev/build). Sign-in page not restyled yet.
 
 ## 0.9 GATE + Phase 2 detail check - done 2026-10-19
 - Results: `npm run typecheck` pass; `npx eslint src test scripts` clean; `npx vitest run` 10 files, 55/55 pass (5.2s); `next build` pass (Next 16.4.2 Turbopack): / static, /sign-in partial prerender, /api/auth dynamic, /dev/outbox prerendered as notFound in production (guard checked).
@@ -32,13 +41,7 @@ Current task: 1.1 Design tokens + fonts
 - Tests: typecheck pass; eslint clean; `npx vitest run test/auth.test.ts test/db-ensure.test.ts test/email.test.ts test/authz` 26/26 pass. auth.test: CSRF -> signin/email -> 1 hashed verification token + 1 outbox mail -> callback consumes token, creates user + DB session -> /session returns roles from user_roles; DB rejects unknown role.
 - Open: assignments in AuthContext empty until those collections exist. Staff 12h re-auth (PRD §13.2) not done. Google provider not added (optional). Production should set AUTH_URL (Auth.js trusts Host otherwise only outside prod). `/sign-in`, `/sign-in/check-email` pages come in 0.7c. Not tried with real Resend.
 
-## 0.7a Email transport - done 2026-10-19
-- Split: 0.7 was ~10 files, split (user approved) into 0.7a email transport, 0.7b Auth.js core, 0.7c sign-in + /dev/outbox pages (PLAN.md updated).
-- Done: `email_outbox` zod + `$jsonSchema` in schemas/system.ts (`EMAIL_TEMPLATES` = PRD §14 list, `OUTBOX_TTL_MS` 7 days), registry entry (createdAt_desc, expiresAt TTL). `src/server/data/email-outbox.ts`: `insertOutboxEmail`, `listOutboxEmails` (system-level, no AuthContext, dev only). `src/server/email/index.ts`: `selectTransport(config)` = Resend if configured, outbox outside production, else null; `sendEmail(msg, transport?)` throws `EmailNotConfiguredError` when null; `emailAvailable()`; `EmailSendError` carries no content.
-- Files: src/server/data/{schemas/system,registry,email-outbox}.ts, src/server/email/index.ts (removed .gitkeep), test/email.test.ts, docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/email.test.ts test/db-ensure.test.ts` 10/10 pass (selection x3 incl. production refusal, outbox write + TTL index, newest first, app + DB validators reject bad template/recipient).
-- Open: Resend transport not exercised against the real API (no key). No React Email templates yet; callers pass text/html. Outbox bodies hold sign-in links in dev: only /dev/outbox (0.7c) may read them.
-
+- 0.7a Email transport - done 2026-10-19: `email_outbox` + TTL, `sendEmail` (Resend or dev outbox, refuses in prod without Resend), `EmailNotConfiguredError`.
 - 0.6 Field encryption + audit + logger - done 2026-10-19: AES-256-GCM `encryptField`/`decryptField` with kid + aad, allowlisted logger, `recordAudit` with meta allowlist.
 - 0.5 Authz core - done 2026-10-19: capability map, `AuthContext`, `requireUser`/`requireCapability`, `scopedCollection` + scopes; IDOR tests.
 - 0.4 Mongo client + ensure - done 2026-10-19: `getDb()` cached client, registry + `ensureCollections`, zod + `$jsonSchema` by hand, `db:ensure` script; memory-server tests.

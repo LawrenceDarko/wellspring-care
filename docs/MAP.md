@@ -7,18 +7,18 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `next.config.ts` - Next 16 (cacheComponents, partialPrefetching, Tailwind via turbopack loader).
 - `tsconfig.json` - strict, `@/*` -> `src/*`, `allowImportingTsExtensions` (scripts run via Node type stripping).
 - `eslint.config.mjs` - flat config, next core-web-vitals + typescript.
-- `vitest.config.ts` - node env; includes `test/**/*.test.ts`, `src/**/*.test.ts`; excludes `test/e2e`; `@` alias; `server-only` -> stub; inlines next-auth.
+- `vitest.config.ts` - node env; includes `test/**/*.test.ts`, `src/**/*.test.ts`; excludes `test/e2e`; `@` alias; `server-only`, `next/font/google` -> stubs; inlines next-auth.
 - `playwright.config.ts` - testDir `test/e2e`, chromium + mobile, webServer `npm run dev` (GATE only).
 - `.env.example` - every env var with comments (PRD §17).
 
 ## src/
-- `src/app/layout.tsx` - root layout; exports `metadata`. System font (fonts decided in ADR 002).
-- `src/app/globals.css` - Tailwind v4 import + color tokens.
+- `src/app/layout.tsx` - root layout; exports `metadata`; applies font variables from `src/app/fonts.ts` (Fraunces `--font-heading`, Source Sans 3 `--font-body`, ADR 002).
+- `src/app/globals.css` - Tailwind v4 + shadcn; brand tokens (hex, light only) in :root, `@theme inline` mapping (`gold`, `font-display`); reduced-motion rule. Check with `npm run check:contrast`.
 - `src/app/(public)/page.tsx` - placeholder home with pastoral-care-only notice.
 - `src/app/(portal)/`, `src/app/(staff)/` - empty (.gitkeep).
 - `src/app/api/auth/[...nextauth]/route.ts` - Auth.js GET/POST handlers.
 - `src/app/(public)/sign-in/` - magic-link form (`page.tsx`, server action `requestMagicLink` in `actions.ts`), `check-email/page.tsx`. "Not configured" state on missing env.
-- `src/app/dev/outbox/page.tsx` - dev-only outbox viewer (404 in production).
+- `src/app/dev/outbox/page.tsx` - dev-only outbox viewer (404 in production). `src/app/dev/ui/page.tsx` - token + component preview (404 in production).
 - `src/server/config.ts` - server-only zod env validation. Exports `parseConfig(env)`, `getConfig()` (cached), `ConfigError`, types `Env`, `Config` (`env`, `integrations.{stripe,email,googleCalendar}`).
 - `src/server/db.ts` - server-only Mongo client cached on globalThis. Exports `getClient()`, `getDb()`. Only repositories in `src/server/data/` may call it.
 - `src/server/auth/capabilities.ts` - pure role->capability map (PRD §2). Exports `ROLES`, `CAPABILITIES`, `ROLE_CAPABILITIES`, `capabilitiesFor(roles)`, `isRole`, types `Role`, `Capability`. Check capabilities, never role names.
@@ -37,11 +37,13 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `src/server/email/index.ts` - server-only. `sendEmail(msg)` (Resend if configured, else `email_outbox` outside prod, else `EmailNotConfiguredError`), `selectTransport`, `emailAvailable`, `EMAIL_TEMPLATES`, type `EmailMessage`.
 - `src/server/rate-limit.ts` - server-only PRD §13.5. `rateLimit(scope, id)`, `checkRateLimit`, `RATE_LIMITS`, `clientIp`, `guardPublicForm(form, {headers?})`, `publicFormToken()` (render as hidden `formToken`), `HONEYPOT_FIELD`. Store: `src/server/data/rate-limits.ts` `incrementRateLimit`.
 - `src/server/payments/` - empty (.gitkeep).
-- `src/domain/`, `src/components/`, `src/content/` - empty (.gitkeep).
+- `src/components/ui/` - shadcn (radix, `components.json`): button, card, input, label, textarea, select, dialog, badge, sheet. `cn` from package `cn` (also `@/lib/utils`). Keep focus rings solid (`ring-ring`, no `/50`).
+- `src/domain/`, `src/content/` - empty (.gitkeep).
 
 ## scripts/
 - `scripts/db-ensure.ts` - applies registry via `ensureCollections`; needs only MONGODB_URI/MONGODB_DB (`.env.local` auto-loaded).
 - `scripts/db-seed.ts` - stub, exits 1 "not implemented yet".
+- `scripts/check-contrast.ts` - WCAG check of token pairs in globals.css (`PAIRS`, `checkContrast`, `contrastRatio`).
 
 ## test/
 - `test/smoke.test.ts` - alias + metadata smoke test.
@@ -53,5 +55,6 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `test/rate-limit.test.ts` - fixed window limit/reset/concurrency, honeypot, form token, Origin.
 - `test/email.test.ts` - transport selection, production refusal, outbox write/TTL/validators.
 - `test/helpers/mongo.ts` - `startMongo()` -> `{ uri, client, db, stop }` on MongoMemoryReplSet.
-- `test/helpers/server-only.ts` - empty stub; vitest aliases `server-only` to it.
+- `test/helpers/server-only.ts`, `test/helpers/next-font.ts` - stubs vitest aliases `server-only` / `next/font/google` to.
+- `test/contrast.test.ts` - token contrast pairs, light only, solid focus ring in ui components.
 - `test/e2e/` - Playwright specs (empty).

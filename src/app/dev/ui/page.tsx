@@ -1,0 +1,174 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Textarea } from "@/components/ui/textarea";
+
+// Task 1.1: design token + component preview. 404 in production.
+
+export const metadata: Metadata = { title: "Dev UI", robots: { index: false, follow: false } };
+
+const SWATCHES = [
+  ["background", "bg-background text-foreground"],
+  ["card", "bg-card text-card-foreground"],
+  ["primary", "bg-primary text-primary-foreground"],
+  ["secondary", "bg-secondary text-secondary-foreground"],
+  ["muted", "bg-muted text-muted-foreground"],
+  ["accent", "bg-accent text-accent-foreground"],
+  ["gold", "bg-gold text-gold-foreground"],
+  ["destructive", "bg-destructive text-white"],
+] as const;
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="flex flex-col gap-4">
+      <h2 className="text-2xl">{title}</h2>
+      {children}
+    </section>
+  );
+}
+
+export default function DevUiPage() {
+  if (process.env.NODE_ENV === "production") notFound();
+
+  return (
+    <main className="mx-auto flex w-full max-w-4xl flex-col gap-12 px-4 py-12">
+      <header className="flex flex-col gap-2">
+        <h1 className="text-4xl">Design system</h1>
+        <p className="text-muted-foreground">
+          Tokens and components (PRD §4.4). Light only. Contrast pairs are checked by <code>npm run check:contrast</code>.
+        </p>
+      </header>
+
+      <Section title="Colour tokens">
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {SWATCHES.map(([name, cls]) => (
+            <li key={name} className={`rounded-lg border p-4 text-sm ${cls}`}>
+              {name}
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section title="Typography">
+        <p className="font-display text-5xl">Walking with you</p>
+        <p className="max-w-prose">
+          Body copy uses the humanist sans. Headings use the serif display face. Links look like{" "}
+          <a href="#" className="text-primary underline underline-offset-4">
+            this
+          </a>
+          .
+        </p>
+      </Section>
+
+      <Section title="Buttons and badges">
+        <div className="flex flex-wrap gap-3">
+          <Button>Primary</Button>
+          <Button variant="secondary">Secondary</Button>
+          <Button variant="outline">Outline</Button>
+          <Button variant="ghost">Ghost</Button>
+          <Button variant="link">Link</Button>
+          <Button variant="destructive">Destructive</Button>
+          <Button disabled>Disabled</Button>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Badge>Default</Badge>
+          <Badge variant="secondary">Secondary</Badge>
+          <Badge variant="outline">Outline</Badge>
+          <Badge variant="destructive">Destructive</Badge>
+          <Badge className="bg-gold text-gold-foreground">Gold</Badge>
+        </div>
+      </Section>
+
+      <Section title="Form controls">
+        <Card>
+          <CardHeader>
+            <CardTitle>Sample form</CardTitle>
+            <CardDescription>Not submitted anywhere.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="ui-name">Name</Label>
+              <Input id="ui-name" placeholder="Jane Doe" />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="ui-email">Email (invalid state)</Label>
+              <Input id="ui-email" type="email" aria-invalid defaultValue="not-an-email" />
+              <p className="text-sm text-destructive">Enter a valid email address.</p>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="ui-service">Service</Label>
+              <Select>
+                <SelectTrigger id="ui-service" className="w-full">
+                  <SelectValue placeholder="Choose a service" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="chaplaincy">Chaplaincy visit</SelectItem>
+                  <SelectItem value="wedding">Wedding</SelectItem>
+                  <SelectItem value="memorial">Memorial</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="ui-notes">Notes</Label>
+              <Textarea id="ui-notes" placeholder="Anything we should know" />
+            </div>
+          </CardContent>
+          <CardFooter className="gap-3">
+            <Button type="button">Save</Button>
+            <Button type="button" variant="outline">
+              Cancel
+            </Button>
+          </CardFooter>
+        </Card>
+      </Section>
+
+      <Section title="Overlays">
+        <div className="flex flex-wrap gap-3">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline">Open dialog</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Dialog title</DialogTitle>
+                <DialogDescription>Dialogs trap focus and close on Escape.</DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button>Close</Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline">Open sheet</Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Sheet title</SheetTitle>
+                <SheetDescription>Used for the mobile navigation in 1.2.</SheetDescription>
+              </SheetHeader>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </Section>
+    </main>
+  );
+}

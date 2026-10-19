@@ -6,6 +6,7 @@ export default defineConfig({
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
       "server-only": fileURLToPath(new URL("./test/helpers/server-only.ts", import.meta.url)),
+      "next/font/google": fileURLToPath(new URL("./test/helpers/next-font.ts", import.meta.url)),
     },
   },
   test: {
