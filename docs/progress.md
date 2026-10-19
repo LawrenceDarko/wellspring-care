@@ -1,8 +1,15 @@
 # Progress
 
-Current task: 0.7b Auth.js core
+Current task: 0.7c Sign-in + outbox pages
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 0.7b Auth.js core - done 2026-10-19
+- Done: `src/server/auth/index.ts` (server-only): `createAuthConfig(deps)` = MongoDB adapter (users/accounts/sessions/verification_tokens), `session.strategy: "database"`, email provider (15 min) sending `magicLinkEmail()` (generic subject, template `magic_link`) via `sendEmail()`, secure cookies forced in prod, pages signIn/error `/sign-in`, verifyRequest `/sign-in/check-email`. Session callback reads `user_roles` -> `session.user.{id, roles}`. `NextAuth(() => config)` lazy (no env at import): `handlers, auth, signIn, signOut`; `getAuthContext()` (React `cache`) -> `AuthContext | null`.
+- `user_roles` zod + `$jsonSchema` (schemas/identity.ts, role enum = ROLES), registry (unique userId+role); `src/server/data/user-roles.ts` `listRolesForUser` (system-level). Route `src/app/api/auth/[...nextauth]/route.ts`. Vitest inlines next-auth (its `next/server` import fails under plain Node ESM).
+- Files: src/server/auth/index.ts, src/server/data/{user-roles,registry,schemas/identity}.ts, src/app/api/auth/[...nextauth]/route.ts, test/auth.test.ts, vitest.config.ts, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/auth.test.ts test/db-ensure.test.ts test/email.test.ts test/authz` 26/26 pass. auth.test: CSRF -> signin/email -> 1 hashed verification token + 1 outbox mail -> callback consumes token, creates user + DB session -> /session returns roles from user_roles; DB rejects unknown role.
+- Open: assignments in AuthContext empty until those collections exist. Staff 12h re-auth (PRD §13.2) not done. Google provider not added (optional). Production should set AUTH_URL (Auth.js trusts Host otherwise only outside prod). `/sign-in`, `/sign-in/check-email` pages come in 0.7c. Not tried with real Resend.
 
 ## 0.7a Email transport - done 2026-10-19
 - Split: 0.7 was ~10 files, split (user approved) into 0.7a email transport, 0.7b Auth.js core, 0.7c sign-in + /dev/outbox pages (PLAN.md updated).
@@ -33,12 +40,6 @@ Current task: 0.7b Auth.js core
 - Tests: typecheck pass; eslint clean; `npx vitest run test/db-ensure.test.ts` 4/4 pass (ensure x2 idempotent, TTL, valid insert ok, invalid + duplicate singleton rejected); config+smoke 8/8. Script without URI exits 1 (imports resolve under Node).
 - Open: zod and `$jsonSchema` are maintained by hand side by side (no generator); keep in step. Script not run against a real Atlas/local mongod. mongodb-memory-server downloaded MongoDB 8.2.6 on first run (~77 MB, cached).
 
-## 0.3 Env + config - done 2026-10-19
-- Done: `src/server/config.ts` (`import "server-only"`): zod schema for every `.env.example` key; "" treated as unset; required MONGODB_URI (mongodb[+srv]://), AUTH_SECRET (>=32 chars), FIELD_ENC_KEY (base64, 32 bytes); defaults APP_URL/MONGODB_DB/FIELD_ENC_KID. `parseConfig(env)` pure, `getConfig()` cached from process.env. `integrations.{stripe,email,googleCalendar}` true only when all their keys set. `ConfigError` lists key names only, never values.
-- Vitest aliases `server-only` to `test/helpers/server-only.ts` (real package throws outside RSC builds).
-- Files: src/server/config.ts, test/config.test.ts, test/helpers/server-only.ts, vitest.config.ts, docs/MAP.md, docs/progress.md.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/config.test.ts test/smoke.test.ts` 8/8 pass.
-- Open: config not yet called at boot (first consumer: 0.4 `getDb()`). Stripe needs all 3 keys incl. publishable to count as configured.
-
+- 0.3 Env + config - done 2026-10-19: zod env in `src/server/config.ts` (`parseConfig`, `getConfig`, integration flags, `ConfigError` names keys only); vitest stubs `server-only`.
 - 0.2 RESEARCH Pin versions - done 2026-10-19: all deps pinned exact in ADR 001; mongodb 6.21 (adapter peer), react-email 6.11.3, TS 5.9/ESLint 9 held; Auth.js v5 beta risk noted.
 - 0.1 Scaffold - done 2026-10-19: Next 16.4.2 + React 19 scaffold, Vitest/Playwright configs, folder layout, `.env.example`; AGENTS.md not added; npm audit warnings unreviewed.

@@ -5,6 +5,7 @@ import {
   organizationSettingsValidator,
   rateLimitValidator,
 } from "./schemas/system.ts";
+import { userRoleValidator } from "./schemas/identity.ts";
 
 // PRD §3.1: single source of collection validators + indexes, applied by
 // `npm run db:ensure` and by test helpers. Every index has an explicit name so
@@ -46,6 +47,11 @@ export const collections: CollectionSpec[] = [
       { key: { createdAt: -1 }, name: "createdAt_desc" },
       { key: { expiresAt: 1 }, name: "expiresAt_ttl", expireAfterSeconds: 0 },
     ],
+  },
+  {
+    name: "user_roles",
+    validator: userRoleValidator,
+    indexes: [{ key: { userId: 1, role: 1 }, name: "user_role_unique", unique: true }],
   },
 ];
 
