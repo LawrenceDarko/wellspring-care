@@ -1,8 +1,16 @@
 # Progress
 
-Current task: 0.5 Authz core
+Current task: 0.6 Field encryption + audit + logger
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 0.5 Authz core - done 2026-10-19
+- Done: `src/server/auth/capabilities.ts` (pure): `ROLES`, `CAPABILITIES`, `ROLE_CAPABILITIES` per PRD §2, `capabilitiesFor(roles)` union (unknown roles grant nothing). super_admin = all staff caps + break_glass, roles:grant, audit:read, settings:manage, content:manage. No reflection capability exists at all (owner scope only).
+- `src/server/auth/context.ts` (server-only): `AuthContext { userId: ObjectId, capabilities: Set, assignments: {cohort|care_request|prayer_request|booking: ObjectId[]} }`, `buildAuthContext`, `AuthError(401|403)`, `hasCapability`, `requireUser`, `requireCapability`.
+- `src/server/data/base.ts` (server-only): `scopedCollection(db, name, scope)` -> findOne/find (limit cap 500)/countDocuments/updateOne/deleteOne, each `$and`s scope with caller filter; empty scope throws `UnscopedQueryError`, null scope = deny. Scopes: `ownerScope`, `assignedScope(cap, kind, field)`, `capabilityScope`, `anyScope`.
+- Files: src/server/auth/{capabilities,context}.ts, src/server/data/base.ts, test/authz/{capabilities,base}.test.ts, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/authz` 14/14 pass (role map, multi-role union, super_admin no reflection cap, 401/403, IDOR null, filter can't widen scope, out-of-scope writes no-op, unscoped refused, assigned needs cap+assignment).
+- Open: `requireUser` takes a ctx; session -> AuthContext loader (Auth.js + user_roles + assignments) comes with the auth task. No scoped insert helper yet (inserts must stamp owner in each repo). Extra super_admin caps (audit/settings/content/roles) are my naming, not in PRD table.
 
 ## 0.4 Mongo client + ensure script - done 2026-10-19
 - Done: `src/server/db.ts` (server-only) `getClient()`/`getDb()` cached on `globalThis` (connect promise reset on failure). `src/server/data/schemas/system.ts`: zod schema + hand-written `$jsonSchema` (strict, `additionalProperties: false`) for `organization_settings` (singleton via `key: "default"` + unique index), `audit_logs`, `rate_limits` (TTL `expiresAt`, unique key+window). `src/server/data/registry.ts`: `collections` + `ensureCollections(db)` (createCollection or collMod, named indexes). `scripts/db-ensure.ts` reads only MONGODB_URI/MONGODB_DB; `db:ensure` loads `.env.local` if present.

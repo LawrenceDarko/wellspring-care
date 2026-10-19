@@ -18,9 +18,12 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `src/app/(portal)/`, `src/app/(staff)/`, `src/app/api/` - empty (.gitkeep).
 - `src/server/config.ts` - server-only zod env validation. Exports `parseConfig(env)`, `getConfig()` (cached), `ConfigError`, types `Env`, `Config` (`env`, `integrations.{stripe,email,googleCalendar}`).
 - `src/server/db.ts` - server-only Mongo client cached on globalThis. Exports `getClient()`, `getDb()`. Only repositories in `src/server/data/` may call it.
+- `src/server/auth/capabilities.ts` - pure role->capability map (PRD §2). Exports `ROLES`, `CAPABILITIES`, `ROLE_CAPABILITIES`, `capabilitiesFor(roles)`, `isRole`, types `Role`, `Capability`. Check capabilities, never role names.
+- `src/server/auth/context.ts` - server-only. `AuthContext` type, `buildAuthContext`, `AuthError(401|403)`, `hasCapability`, `requireUser`, `requireCapability`.
+- `src/server/data/base.ts` - server-only scoped repo helper. `scopedCollection(db, name, scope)` (findOne/find/countDocuments/updateOne/deleteOne, all take ctx), scopes `ownerScope`, `assignedScope`, `capabilityScope`, `anyScope`, `UnscopedQueryError`. Every repository builds on this.
 - `src/server/data/schemas/system.ts` - zod schemas + `$jsonSchema` validators (kept in step by hand) for organization_settings, audit_logs, rate_limits. Relative imports only (loaded by Node in scripts).
 - `src/server/data/registry.ts` - `collections` (name, validator, named indexes) + `ensureCollections(db)` (idempotent). Add each new collection here.
-- `src/server/{auth,crypto,email,payments,audit}/` - empty (.gitkeep).
+- `src/server/{crypto,email,payments,audit}/` - empty (.gitkeep).
 - `src/domain/`, `src/components/`, `src/content/` - empty (.gitkeep).
 
 ## scripts/
@@ -31,6 +34,7 @@ Max 60 lines. Each task updates this instead of future tasks exploring. One line
 - `test/smoke.test.ts` - alias + metadata smoke test.
 - `test/config.test.ts` - config parsing, integration booleans, required-key errors.
 - `test/db-ensure.test.ts` - ensure idempotency, TTL, validator accept/reject.
+- `test/authz/` - capability map + scoped-collection IDOR tests (PRD §13.1 IDOR suite lives here).
 - `test/helpers/mongo.ts` - `startMongo()` -> `{ uri, client, db, stop }` on MongoMemoryReplSet.
 - `test/helpers/server-only.ts` - empty stub; vitest aliases `server-only` to it.
 - `test/e2e/` - Playwright specs (empty).
