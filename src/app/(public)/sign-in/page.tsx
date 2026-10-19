@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { connection } from "next/server";
 import { FormGuardFields } from "@/components/site/form-guard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,8 @@ function signInConfigured(): boolean {
 }
 
 async function SignInForm({ searchParams }: { searchParams: PageProps<"/sign-in">["searchParams"] }) {
+  // The form token stamps the render time, so it must be minted per request.
+  await connection();
   const params = await searchParams;
   const error = typeof params.error === "string" ? (ERROR_MESSAGES[params.error] ?? DEFAULT_ERROR) : null;
   const callbackUrl = typeof params.callbackUrl === "string" ? params.callbackUrl : "/";

@@ -1,8 +1,16 @@
 # Progress
 
-Current task: 1.10 GATE (then 2.1)
+Current task: 2.1
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.10 GATE - done 2026-10-19
+- Done: full suite, `next build`, Playwright. New `test/e2e/story.spec.ts`: header menus by keyboard at 1280 (Tab order skip link -> wordmark -> Care, Enter opens, Escape closes + focus back, Tab into menu + Enter follows), mobile menu by keyboard at 360 (focus trapped, Escape returns focus, link closes overlay), home under `reducedMotion: 'reduce'` at 360/1280 (every own-text element in main visible at opacity 1 without scrolling, 5 seasons, no canvas, no `data-story`), home with motion at 1280 (story on, all text opacity 1 after wheel-scrolling through, no page errors), no horizontal scroll on 12 public routes at 360/1280.
+- Fix: `/sign-in` minted `publicFormToken()` (`new Date()`) during prerender (dev error); now `await connection()` first, like contact.
+- First-load JS for `/` (prod build, scripts in the prerendered HTML): 11 files, 814.6 KB raw, 263.9 KB gzip (largest chunks 224 / 156 / 132 / 110 KB raw).
+- Files: test/e2e/story.spec.ts, src/app/(public)/sign-in/page.tsx, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run` 194/194 (26 files); `next build` ok; `npm run test:e2e` 9/9; after the fix auth + form-guard 3/3, build + e2e 9/9 rerun.
+- Open: not checked on a real GPU/Safari or by eye in this gate (visual drift edges, sticky offset, hero contrast over the shader, LCP). Home JS is heavy (GSAP + Lenis + shader); a later task could split the story islands. Contact page still has no header (stillLake reserved).
 
 ## 1.10h Services + content treatments - done 2026-10-19
 - Done: `src/components/site/page-header.tsx` `PageHeader({media} | {season})`: full-width band (clamp 11rem/34svh/22rem, gold hairline) with a `MEDIA` photo via `next/image` (`fill`, `preload`, 100vw) or a decorative season vignette, oversized layer in `Parallax` (0.1). `ContentPage({media?})` header slot: about chapelCross, chaplaincy heldHands, weddings weddingHands, funerals candle, programs forestPath, prayer teaLights (legal pages none). Services directory riverDawn; service detail its season vignette (none if the category maps to no season).
@@ -33,14 +41,7 @@ Current task: 1.10 GATE (then 2.1)
 - Tests: typecheck pass; eslint clean; `npx vitest run test/shader.test.tsx test/art.test.tsx` 15/15 (guard table, DPR cap, SSR fallback no canvas, fallback only under reduced/narrow/no WebGL2/no matchMedia, no context -> canvas dropped, fake GL: no draw until visible, draws + fades in, pauses offscreen, releases on unmount). Temporary `next dev` (:3210, own distDir, killed, removed; tsconfig glob reverted) + scratch Playwright on `/dev/ui`: 1280 canvas present + opacity-100, screenshot matches the SVG sky; reduced motion and 360 px: no canvas; no console errors (only Chrome "GPU stall due to ReadPixels" driver warnings, also seen at 360 without the canvas = screenshot readback).
 - Open: water-light motion is very subtle in the screenshot (tune with the hero in 1.10f); not run on a real GPU/Safari.
 
-## 1.10d Vector art set - done 2026-10-19
-- Done: `src/components/art/`: `tokens.ts` (`ART_TOKENS`, `art(token)` -> `var(--art-*)`, shared `treePath`), `landscape.tsx` (wellspring at dawn: `Sky` (gradient, sun glow), `FarHills`, `NearHills`, `Water` (spring + stream, sun glints), `Trees` (foreground banks + trees), `Birds`; each its own aria-hidden `<svg>` on viewBox 1440x900, `xMidYMax slice`, shapes run past the bottom with overflow visible), `LANDSCAPE_LAYERS` (depths: sky 0.3, far 0.2, near hills + water 0.1, trees 0, birds 0.36), `Landscape({parallax?})` (clipped box, wraps moving layers in `Parallax`). `seasons-art.tsx`: five vignettes (320x200) on the one stream, each at its own hour: confluence, tree household, spring rings + shoot, lit house window, moonlit still pool + cairn; `SEASON_ART`, `SeasonArt({season})`. Barrel `index.ts`.
-- 16 `--art-*` hex tokens in `:root` (decorative, no contrast pairs). Colours set via `style` (var() in presentation attributes is not reliable); gradient ids from `useId`.
-- `/dev/ui` "Vector art" block: parallax landscape + the five vignettes under `SEASONS` names.
-- Files: src/components/art/{tokens.ts,landscape.tsx,seasons-art.tsx,index.ts}, src/app/globals.css, src/app/dev/ui/page.tsx, test/art.test.tsx, docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/art.test.tsx test/contrast.test.ts test/motion.test.tsx` 16/16 (art 5: tokens defined as hex, no hex/rgb/hsl in sources or markup, 6 aria-hidden layer svgs on one viewBox, parallax depths wired + foreground static, one vignette per season with unique resolvable gradient ids). `check:contrast` 28/28. Temporary `next dev` (:3210, own distDir, then killed and removed) + scratch Playwright: `/dev/ui` horizontal overflow 0 px at 360 and 1280; screenshots reviewed (fixed: trees cropped out at 360, heavy bank stripe in the illness vignette).
-- Open: parallax drift not watched while scrolling (screenshots are static); mobile hero is mostly sky (room for the tagline in 1.10f). Light-only palette, like the rest.
-
+- 1.10d Vector art set - done 2026-10-19: `src/components/art/` landscape layers (viewBox 1440x900, `LANDSCAPE_LAYERS` depths) + five season vignettes, 16 `--art-*` tokens via `art()`, /dev/ui specimen; 16/16.
 - 1.10c Motion foundation - done 2026-10-19: `src/components/motion/` (gsap tokens, `useReducedMotion` server=reduced, `MotionProvider` Lenis on GSAP ticker, `Reveal`, `Parallax`), mounted on the public layout; 28/28.
 - 1.10b Header + nav redesign - done 2026-10-19: `NAV_GROUPS` + flat `MAIN_NAV`, shadcn navigation-menu, one-row sticky header from lg (`HeaderScroll` over-hero/hidden attrs), forest mobile Dialog overlay, footer Explore nav; 58/58.
 - 1.10a RESEARCH Motion + imagery direction - done 2026-10-19: ADR 007 wellspring story, GSAP + Lenis + one raw WebGL2 shader, stock rules, one-row grouped nav; gsap 3.15.0, @gsap/react 2.1.2, lenis 1.3.26 pinned; PLAN 1.10b-h + GATE.
