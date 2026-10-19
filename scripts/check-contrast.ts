@@ -36,7 +36,10 @@ export const PAIRS: Pair[] = [
   { fg: "ring", bg: "background", min: UI, use: "focus ring" },
   { fg: "ring", bg: "card", min: UI, use: "focus ring on cards" },
   { fg: "gold", bg: "background", min: UI, use: "gold icons and rules" },
-  { fg: "primary", bg: "secondary", min: UI, use: "primary icon on sage" },
+  { fg: "primary", bg: "secondary", min: TEXT, use: "forest text on moss" },
+  { fg: "band-foreground", bg: "band", min: TEXT, use: "text on forest band" },
+  { fg: "band-muted", bg: "band", min: TEXT, use: "secondary text on forest band" },
+  { fg: "band-gold", bg: "band", min: UI, use: "season markers on forest band" },
 ];
 
 /** Reads `--name: #rrggbb;` declarations from the first `:root { ... }` block. */

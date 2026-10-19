@@ -1,8 +1,15 @@
 # Progress
 
-Current task: 1.9 GATE + write Phase 2 tasks
+Current task: 1.9b Shell restyle (then 1.9c-e, then 1.9 GATE)
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.9a Design direction - done 2026-10-19
+- Done: ADR 006 (life-seasons path as the one signature device, refined PRD palette, book-page layout, 8 UI rules) from `.claude/skills/frontend-design` (installed from anthropics/skills). Tokens: linen bg `#f6f5ef`, charcoal `#262624`, moss secondary, pale-moss accent (gold now rules/markers only), new `band`/`band-foreground`/`band-muted`/`band-gold`. Type scale in `@theme` (`text-body` 17px/1.65, `text-lede`, `text-h3..h1`, fluid `text-display`), `max-w-measure` 65ch, `type-display` + `band` utilities (band swaps focus ring to linen). Body defaults to `text-body`; headings `text-wrap: balance`.
+- PLAN.md: tasks 1.9b-e added before 1.9 GATE. ADR README lists 006 (003 stays reserved for installments).
+- Files: src/app/globals.css, scripts/check-contrast.ts, src/app/dev/ui/page.tsx, docs/adr/{006-design-direction.md,README.md}, docs/{PLAN,progress,MAP}.md, .claude/skills/frontend-design/.
+- Tests: typecheck pass; eslint clean; `check:contrast` 28/28; `npx vitest run test/contrast.test.ts test/site-shell.test.tsx test/home.test.tsx` 14/14 pass.
+- Open: CLAUDE.md is read-only on disk, so the "UI design" rule is in MAP.md, not CLAUDE.md (user to add). Not rendered in dev server (new tokens shift all pages slightly; checked in 1.9 GATE). Existing pages still use old card-grid layouts until 1.9b-e.
 
 ## 1.8 Contact + general inquiry - done 2026-10-19
 - Done: `/contact` page (EmergencyNotice, link to /services for care requests) with RHF + zod client form (`contact-form.tsx`, `useActionState`, posts without JS too) -> server action `sendContactMessage` -> `submitContactForm` (`src/server/contact.ts`): guard (honeypot looks like success, stores nothing; bad/too-fast/expired token -> "form expired") -> validate (`contactInputSchema` in `src/domain/contact.ts`) -> rate limit per IP and per email (`publicForm` rule, scopes contactIp/contactEmail) -> `insertContactMessage` -> generic "inquiry_received" email (no name/message); missing/failing email transport only skips the receipt.
@@ -34,14 +41,7 @@ Current task: 1.9 GATE + write Phase 2 tasks
 - Tests: typecheck pass; eslint clean; `npx vitest run test/services.test.tsx test/catalog.test.ts test/home.test.tsx` 19/19 pass (slug param validation, directory links/filter/empty/unknown, detail packages/price/eligibility/request href, inactive package excluded from starting price).
 - Open: not rendered with dev server or `next build` (Suspense + params under cacheComponents unverified until 1.9 GATE). `/request/<slug>` 404s until Phase 2 intake (route name chosen here, Phase 2 should use it). Price is per package currency; mixed currencies not compared. Admin catalog writes must `revalidateTag("catalog")`.
 
-## 1.4 Home page - done 2026-10-19
-- Done: `HomeSections` (pure props) per PRD §4.3: hero (tagline from settings, "Request Spiritual Care" -> /services until intake exists, "Explore Programs" -> /programs, pastoral-care-only line), active categories (links `/services?category=<slug>`), 4/8-week renewal (not-a-cure line), weddings/funerals, family + chaplaincy, events, testimonials, mission/values. Events and testimonials sections omitted when empty.
-- New collections `events`, `testimonials` (schemas/content.ts, registry). Validator rejects `published: true` without `consentRecordId`. `src/server/data/content.ts`: `listUpcomingEvents` (published, not ended, soonest first), `listPublishedTestimonials` (also requires `consent_records` doc granted + not revoked).
-- Page loads via `"use cache"` tags organization-settings/catalog/events/testimonials, cacheLife minutes; ConfigError -> defaults with no DB sections.
-- Files: src/server/data/{schemas/content.ts,content.ts,registry.ts}, src/components/site/home.tsx, src/app/(public)/page.tsx, test/{home.test.tsx,content.test.ts}, docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/home.test.tsx test/content.test.ts test/db-ensure.test.ts` 12/12 pass (CTAs, sections, no testimonial/event section when empty, event date in org tz, revoked/denied/missing consent hidden, validator rejects unconsented publish); smoke + catalog + site-shell 13/13.
-- Open: not rendered in dev server/build (1.9 GATE). Mission/values copy is generic placeholder for org review. `consent_records` has no validator yet (intake tasks). Consent revoke and event/testimonial admin writes must `revalidateTag` ("testimonials"/"events"). Linked routes 404 until their tasks.
-
+- 1.4 Home page - done 2026-10-19: `HomeSections` per PRD §4.3, `events`/`testimonials` collections (publish needs consent), cached loader with defaults on ConfigError.
 - 1.3 Catalog data + seed - done 2026-10-19: catalog zod + validators, public `listCategories`/`listServices`/`getServiceBySlug`, `seedCatalog` (20 services, packages inactive, $setOnInsert), `db:seed`.
 - 1.2 Site shell - done 2026-10-19: `getSettings` over defaults, public layout (skip link, header, mobile Sheet nav, footer with 911/988 + legal links), Testing Library + jsdom dev deps.
 - 1.1 Design tokens + fonts - done 2026-10-19: brand tokens + `@theme inline`, Fraunces/Source Sans 3 (ADR 002), shadcn init + 9 components, solid focus rings, `check:contrast` 25/25.

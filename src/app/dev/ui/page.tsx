@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 
-// Task 1.1: design token + component preview. 404 in production.
+// Tasks 1.1 + 1.9a: design token + component preview (ADR 006). 404 in production.
 
 export const metadata: Metadata = { title: "Dev UI", robots: { index: false, follow: false } };
 
@@ -31,6 +31,7 @@ const SWATCHES = [
   ["muted", "bg-muted text-muted-foreground"],
   ["accent", "bg-accent text-accent-foreground"],
   ["gold", "bg-gold text-gold-foreground"],
+  ["band", "band"],
   ["destructive", "bg-destructive text-white"],
 ] as const;
 
@@ -66,14 +67,33 @@ export default function DevUiPage() {
       </Section>
 
       <Section title="Typography">
-        <p className="font-display text-5xl">Walking with you</p>
-        <p className="max-w-prose">
-          Body copy uses the humanist sans. Headings use the serif display face. Links look like{" "}
+        <p className="type-display">Walking with you</p>
+        <p className="font-display text-h1">Heading 1</p>
+        <p className="font-display text-h2">Heading 2</p>
+        <p className="font-display text-h3">Heading 3</p>
+        <p className="max-w-measure text-lede">Lede text introduces a page in one or two sentences.</p>
+        <p className="max-w-measure">
+          Body copy uses the humanist sans at 17px and stays within about 65 characters per line. Headings use the
+          serif display face. Links look like{" "}
           <a href="#" className="text-primary underline underline-offset-4">
             this
           </a>
           .
         </p>
+      </Section>
+
+      <Section title="Forest band">
+        <div className="band flex flex-col gap-4 rounded-lg p-8">
+          <p className="type-display">Every season of life</p>
+          <p className="max-w-measure text-band-muted">Secondary text on the band.</p>
+          <div className="h-px w-24 bg-band-gold" />
+          <div className="flex flex-wrap gap-3">
+            <Button variant="secondary">Request spiritual care</Button>
+            <a href="#" className="rounded-sm underline underline-offset-4">
+              Focus this link to see the linen ring
+            </a>
+          </div>
+        </div>
       </Section>
 
       <Section title="Buttons and badges">
