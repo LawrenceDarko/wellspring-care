@@ -1,8 +1,15 @@
 # Progress
 
-Current task: 1.10g RESEARCH Stock media (then 1.10h, GATE, then 2.1)
+Current task: 1.10h Services + content treatments (then 1.10 GATE, then 2.1)
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
+
+## 1.10g RESEARCH Stock media - done 2026-10-19
+- Done: ADR 008. Nine Unsplash photos (Unsplash License, free tier only) in `public/media/*.webp`, 1600x1067 landscape crops from the Unsplash CDN, 2.9 MB total (largest 763 KB): river-dawn, wedding-hands, family-path (from behind), forest-path, held-hands, candle, tea-lights, chapel-cross, still-lake. No faces (contact-sheet review). No video (Unsplash has none, Pexels needs an API key).
+- `src/content/media.ts` `MEDIA`/`MEDIA_LIST` (src, alt, credit, sourceUrl, licence, width, height, people, use). `PhotoCredits` (content.tsx) at the end of /about.
+- Files: public/media/*, src/content/media.ts, src/components/site/content.tsx, src/app/(public)/about/page.tsx, test/media.test.tsx, docs.
+- Tests: typecheck pass; eslint clean; `npx vitest run test/media.test.tsx test/content-pages.test.tsx` 30/30 (budget <= 10, fields per entry, files exist < 1 MB, no unregistered files, no faces, credits list + licence link). `check:copy` ok.
+- Open: images not placed on pages yet (1.10h). Unsplash search pages are bot-walled for curl; picks were found via WebFetch and downloaded from images.unsplash.com.
 
 ## 1.10f Home story - done 2026-10-19
 - Done: `src/components/site/home-story.tsx` client islands. `HomeHero`: light dawn hero (`data-hero="light"`), `LANDSCAPE_LAYERS` full-bleed with `WellspringShader` as the sky (SVG `Sky` fallback); from md + motion, pinned 60% scrub: layers scale by depth (foreground most), birds rise, copy drifts up (never fades). `SeasonsChapter`: forest band, `<ol>` of five seasons each with inline vignette, line, category links; from lg + motion (`story` state) items become 60svh scenes, sticky stage crossfades the active vignette (ScrollTrigger per scene), gold stream line scrubbed, active marker filled. `home.tsx`: hero -> chapter -> book-page `Section`s wrapped in `Reveal` -> closing still-pool band (`Landscape parallax` strip, "Find care by season" /services, "Contact us"). Data unchanged.
@@ -33,14 +40,7 @@ Current task: 1.10g RESEARCH Stock media (then 1.10h, GATE, then 2.1)
 - Tests: typecheck pass; eslint clean; `npx vitest run test/motion.test.tsx test/site-shell.test.tsx test/contrast.test.ts test/home.test.tsx` 28/28 (motion 6: SSR has no style/opacity/transform, missing matchMedia = reduced, reduced -> no inline styles + no Lenis, motion on -> reveal opacity 0 not visibility, Lenis started/stopped on scroll lock/destroyed). `check:contrast` 28/28.
 - Open: not run in a browser (no dev server in this task); `data-scroll-locked` attr name assumed from react-remove-scroll-bar, verify in 1.10 GATE (page must not scroll behind the mobile overlay). Lenis anchors off: hash jumps are native (scroll-padding-top applies). Reveals of elements already in view on load blink once (JS from-state after paint).
 
-## 1.10b Header + nav redesign - done 2026-10-19
-- Done: `nav.ts` `NAV_GROUPS` (Care: Services, Chaplaincy, Weddings, Funerals & memorials; Programs & events: Programs, Events & retreats, Resources; Prayer, About, Contact) with one-line descriptions from page copy, `REQUEST_CARE` (/services), `MAIN_NAV` now flattened from groups (sentence case labels). shadcn navigation-menu added (focus ring made solid, trigger restyled quiet + 44px, removed its focus-ring suppression on links).
-- Header: one row from `lg` (wordmark wraps to 2 lines at lg, grouped menus, plain links, "Request care" button), sticky. `HeaderScroll` (client) sets `data-over-hero` (a `[data-hero]` still under it), `data-hidden` (scroll down past 2x height; not while focus is inside or a menu is open). CSS: `header-over-hero` swaps tokens to band, off while any `[data-state=open]`; `--header-h` + `h/min-h/-mt/pt-header`, `scroll-padding-top`. Home hero has `data-hero -mt-header pt-header`.
-- Mobile (<lg): full-screen forest Radix Dialog, group headings + Fraunces links, Request care, emergency notice; `motion-safe:menu-stagger` (`--i`), instant under reduced motion. Footer gains "Explore" nav (all `MAIN_NAV`) so menus degrade without JS.
-- Files: src/components/site/{nav.ts,site-header,header-scroll,mobile-nav,site-footer,home}.tsx, src/components/ui/navigation-menu.tsx, src/app/globals.css, test/site-shell.test.tsx, docs.
-- Tests: typecheck pass; eslint clean; `npx vitest run test/site-shell.test.tsx test/home.test.tsx test/contrast.test.ts test/legal-pages.test.tsx test/content-pages.test.tsx test/services.test.tsx` 58/58 (site-shell 12: skip link first, groups/links/Request care, every route from desktop menus and mobile overlay, Escape + focus return both menus, link closes overlay, footer Site nav, hide/show + over-hero attributes, 44px targets). `check:contrast` 28/28, `check:copy` ok. New Tailwind classes verified by compiling globals.css.
-- Open: not rendered in a browser (task did not call for the dev server; 1.10 GATE Playwright covers 360/1280 + keyboard menus). Hero is linen-headed for a frame before hydration. /events and /resources still 404 (later phases). Desktop flat links are plain `Link`s (Tab, not arrow keys).
-
+- 1.10b Header + nav redesign - done 2026-10-19: `NAV_GROUPS` + flat `MAIN_NAV`, shadcn navigation-menu, one-row sticky header from lg (`HeaderScroll` over-hero/hidden attrs), forest mobile Dialog overlay, footer Explore nav; 58/58.
 - 1.10a RESEARCH Motion + imagery direction - done 2026-10-19: ADR 007 wellspring story, GSAP + Lenis + one raw WebGL2 shader, stock rules, one-row grouped nav; gsap 3.15.0, @gsap/react 2.1.2, lenis 1.3.26 pinned; PLAN 1.10b-h + GATE.
 - 1.9 GATE + write Phase 2 tasks - done 2026-10-19: first Playwright smoke (home -> services -> detail -> contact at 360/1280, no horizontal scroll), hermetic `test/e2e/server.ts`, Phase 2 tasks 2.1-2.10 written; 134/134 vitest, build ok, e2e 2/2.
 - 1.9e Content, legal, contact, sign-in restyle - done 2026-10-19: `ContentPage` book page (measure, lede, gold hairline h2, margin note), `LegalPage` draft notice in margin, contact book-page + clearer `CONTACT_MESSAGES`, sign-in on shadcn inputs.

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { MDXComponents } from "mdx/types";
 import { EmergencyNotice } from "@/components/site/site-footer";
+import { MEDIA_LIST, UNSPLASH_LICENSE_URL } from "@/content/media";
 
 // Long-form content pages (PRD §4.1, §4.2). Copy lives in src/content/*.mdx and is styled
 // through `contentComponents` (wired up in src/mdx-components.tsx).
@@ -85,4 +86,32 @@ export function DraftBanner() {
 /** Legal and scope pages (PRD §4.1): draft notice in the margin, read before the body. */
 export function LegalPage({ children }: { children: React.ReactNode }) {
   return <ContentPage note={<DraftBanner />}>{children}</ContentPage>;
+}
+
+/** Credits for every stock photo in `src/content/media.ts` (ADR 007 Stock), shown on /about. */
+export function PhotoCredits() {
+  return (
+    <section aria-labelledby="photo-credits" className="flex flex-col gap-4">
+      <h2 id="photo-credits" className="mt-6 border-t border-gold/40 pt-10 text-h3 font-medium">
+        Photo credits
+      </h2>
+      <p className="text-[0.9375rem] text-muted-foreground">
+        Photographs are used under the{" "}
+        <a href={UNSPLASH_LICENSE_URL} className={linkClass}>
+          Unsplash License
+        </a>
+        . They show places and hands, not the people we serve.
+      </p>
+      <ul className="flex flex-col gap-1 text-[0.9375rem]">
+        {MEDIA_LIST.map((m) => (
+          <li key={m.src}>
+            <a href={m.sourceUrl} className={linkClass}>
+              {m.alt.replace(/\.$/, "")}
+            </a>{" "}
+            <span className="text-muted-foreground">by {m.credit}, {m.licence}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
 }
