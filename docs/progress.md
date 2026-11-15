@@ -4,6 +4,11 @@ Current task: 2.1
 
 <!-- Each entry max 12 lines: task, done, files touched, tests run (real results), open issues. Keep the last 5; collapse older to one line. -->
 
+## Remove photo credits (user request) - done 2026-11-15
+- Done: removed the "Photo credits" section from /about (`PhotoCredits` component deleted). Credit/source/licence data stays in `src/content/media.ts` as a provenance record, not displayed.
+- Files: src/app/(public)/about/page.tsx, src/components/site/content.tsx, src/content/media.ts, test/media.test.tsx, docs/MAP.md, docs/adr/008-stock-media.md.
+- Tests: typecheck pass; eslint clean; vitest test/media.test.tsx 21/21.
+
 ## 1.11 Home motion + season photos (user request) - done 2026-10-19
 - Done: hero intro (layers settle by depth, headline rises word by word via `HeroWords`, copy staggers in), pointer depth drift on fine pointers md+ (`data-drift`, quickTo), stronger pinned scrub (zoom by depth, birds lift, dawn bloom, scroll cue). Fixed pin: parent is flex so ScrollTrigger had `pinSpacing` off and the seasons chapter slid over the pinned hero (since 1.10f); now explicit.
 - Seasons: vector vignettes replaced by season photos (`SEASON_MEDIA` in media.ts). lg story: sticky photo stage, scrubbed clip-path wipe up per scene + previous photo lifts away, slow settle, numbered caption swap, 5-segment progress; per-scene copy rises in (ends opacity 1). Below lg / reduced: inline photo with slow Parallax. Still-pool band: stillLake photo with parallax instead of the vector landscape.
