@@ -11,8 +11,8 @@ ADR 007 allows licensed stock from Unsplash/Pexels for home chapters, services a
 - Set: river at dawn (home chapter, services), wedding hands over roses (weddings, marriage), family from behind on a mountain road (family), sunlit forest path (programs, renewal), held hands on a bed sheet (chaplaincy, illness), single candle (funerals, loss), many tea lights (prayer), stone chapel cross (about), still lake at dusk (closing still-pool band, contact).
 - No faces: people appear only as hands or from behind (`people` field). Candidates with faces or a childbirth scene were rejected after a contact-sheet review.
 - No video for now: Unsplash has none, Pexels video needs an API key, and the hero already moves (shader + scroll). Reconsider only with a key and a measured LCP.
-- Registry `src/content/media.ts` (`MEDIA`, `MEDIA_LIST`: src, alt, credit, sourceUrl, licence, width, height, people, use). Credits: `PhotoCredits` section at the end of /about.
+- Registry `src/content/media.ts` (`MEDIA`, `MEDIA_LIST`: src, alt, credit, sourceUrl, licence, width, height, people, use). Credits kept in the registry only; the /about credits section was removed on request (Unsplash License does not require attribution).
 ## Verification
-`test/media.test.tsx`: <= 10 entries, every entry has alt + credit + source + licence + size, every file exists (< 1 MB) and no unregistered files, `people` never shows a face, credits list renders every entry with its source link.
+`test/media.test.tsx`: <= 10 entries, every entry has alt + credit + source + licence + size, every file exists (< 1 MB) and no unregistered files, `people` never shows a face.
 ## Consequences
 1.10h uses `MEDIA` for page headers via `next/image` (local files, width/height known). Do not set a photo next to a quote or testimonial. Adding an image means adding a registry entry (test fails on unregistered files).

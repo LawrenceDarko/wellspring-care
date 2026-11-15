@@ -1,6 +1,6 @@
 // Licensed stock photos (ADR 007 Stock, 1.10g). Files live in public/media/ (downloaded
 // from the Unsplash CDN as 1600px webp, never hotlinked). Every entry carries its credit,
-// source and licence; `PhotoCredits` on /about lists them all.
+// source and licence as a provenance record (not displayed on the site).
 // Subjects are landscapes, hands, candles and chapels; people only as hands or from
 // behind. Never place one beside a quote or caption that implies a client.
 
